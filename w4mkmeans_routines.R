@@ -2,6 +2,8 @@
 ## these are the batch-independent and file-structure-independent routines to support the w4mkmeans tool
 ##------------------------------------------------------------------------------------------------------
 
+library(parallel)
+
 w4kmeans_usage <- function() {
   return ( 
    paste(
@@ -29,8 +31,6 @@ w4kmeans_usage <- function() {
     )
   )
 }
-
-library(parallel)
 
 w4mkmeans <- function(env) {
   # abort if 'env' is null or is not an environment
@@ -64,8 +64,9 @@ w4mkmeans <- function(env) {
   kfeatures       <- env$kfeatures
   slots           <- env$slots
 
-  # myLapply <- function(cl, ...) lapply(...)
   myLapply <- parLapply
+  # uncomment the next line to mimic parLapply, but without parallelization (for testing/experimentation)
+  # myLapply <- function(cl, ...) lapply(...)
   cl <- NULL
   if ( identical(myLapply, parLapply) ) {
     log_print(sprintf("w4mkmeans: using parallel evaluation with %d slots", slots))
@@ -80,69 +81,72 @@ w4mkmeans <- function(env) {
       , "prepare.data.matrix"
       )
     )
+    final <- function(cl) {
+      # from ?makePSOCKcluster: "It is good practice to shut down the workers by calling stopCluster."
+      if ( !is.null(cl) ) {
+        log_print("w4mkmeans: stopping cluster used for parallel evaluation")
+        stopCluster(cl)
+      }
+    }
   } else {
-    log_print("w4mkmeans: using sequential evaluation with 1 slots")
+    log_print("w4mkmeans: using sequential evaluation (1 slot)")
+    final <- function(cl) { }
   }
-  tryCatch(expr = {
-    # These myLapply calls produce lists of lists of results:
-    #   - The outer list has no keys and its members are accessed by index
-    #   - The inner list has keys "clusters" and "scores"
 
-    # for each $i in ksamples, append column 'k$i' to data frame sampleMetadata
-    ksamples_length <- length(ksamples)
-    if ( ksamples_length > 0 ) {
-      smpl_result_list <- myLapply( 
-          cl = cl
-        , ksamples
-        , calc_kmeans_one_dimension_one_k
-        , env = env
-        , dimension = "samples"
-        )
-      str(smpl_result_list)
-      print(sprintf("length of smpl_result_list = %d", length(smpl_result_list)))
-      for ( i in 1:ksamples_length ) {
-        result <- smpl_result_list[[i]]
-        if (result$success) {
-          print(sprintf("length of result$clusters = %d", length(result$value$clusters)))
-          sampleMetadata[sprintf("k%d",ksamples[i])] <- result$value$clusters
-          scores <- c(scores, result$value$scores)
+  tryCatch(
+    expr = {
+      # These myLapply calls produce lists of lists of results:
+      #   - The outer list has no keys and its members are accessed by index
+      #   - The inner list has keys "clusters" and "scores"
+
+      # for each $i in ksamples, append column 'k$i' to data frame sampleMetadata
+      ksamples_length <- length(ksamples)
+      if ( ksamples_length > 0 ) {
+        smpl_result_list <- myLapply( 
+            cl = cl
+          , ksamples
+          , calc_kmeans_one_dimension_one_k
+          , env = env
+          , dimension = "samples"
+          )
+        for ( i in 1:ksamples_length ) {
+          result <- smpl_result_list[[i]]
+          if (result$success) {
+            sampleMetadata[sprintf("k%d",ksamples[i])] <- result$value$clusters
+            scores <- c(scores, result$value$scores)
+          }
         }
       }
-    }
 
-
-    # for each $i in kfeatures, append column 'k$i' to data frame featureMetadata
-    kfeatures_length <- length(kfeatures)
-    if ( kfeatures_length > 0 ) {
-      feat_result_list <- myLapply( 
-          cl = cl
-        , kfeatures
-        , calc_kmeans_one_dimension_one_k
-        , env = env
-        , dimension = "features"
-        )
-      print(sprintf("length of feat_result_list = %d", length(feat_result_list)))
-      for ( i in 1:kfeatures_length ) {
-        result <- feat_result_list[[i]]
-        if (result$success) {
-          featureMetadata[sprintf("k%d",kfeatures[i])] <- result$value$clusters
-          scores <- c(scores, result$value$scores)
+      # for each $i in kfeatures, append column 'k$i' to data frame featureMetadata
+      kfeatures_length <- length(kfeatures)
+      if ( kfeatures_length > 0 ) {
+        feat_result_list <- myLapply( 
+            cl = cl
+          , kfeatures
+          , calc_kmeans_one_dimension_one_k
+          , env = env
+          , dimension = "features"
+          )
+        for ( i in 1:kfeatures_length ) {
+          result <- feat_result_list[[i]]
+          if (result$success) {
+            featureMetadata[sprintf("k%d",kfeatures[i])] <- result$value$clusters
+            scores <- c(scores, result$value$scores)
+          }
         }
       }
-    }
 
-    return ( 
-      list(
-        variableMetadata = featureMetadata
-      , sampleMetadata   = sampleMetadata  
-      , scores           = scores          
+      return ( 
+        list(
+          variableMetadata = featureMetadata
+        , sampleMetadata   = sampleMetadata  
+        , scores           = scores          
+        )
       )
-    )
-  }, finally = {
-    # from ?makePSOCKcluster: "It is good practice to shut down the workers by calling stopCluster."
-    if ( !is.null(cl) )
-      stopCluster(cl)
-  })
+    }
+  , finally = final(cl)
+  )
 }
 
 # calculate k-means for features or samples
@@ -196,12 +200,14 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
     set.seed(4567)
     # do the k-means clustering
     km <- kmeans( x = dm, centers = k, iter.max, nstart = nstart, algorithm = algorithm )
-    scores <- sprintf("%s\t%d\t%0.5e\t%0.5e\t%0.5f"
-                     , dimension
-                     , k
-                     , km$totss
-                     , km$betweenss
-                     , km$betweenss/km$totss )
+    scores <-
+      sprintf("%s\t%d\t%0.5e\t%0.5e\t%0.5f"
+             , dimension
+             , k
+             , km$totss
+             , km$betweenss
+             , km$betweenss/km$totss
+             )
     list(clusters = km$cluster, scores = scores)
   })
   return ( result_list )
@@ -346,11 +352,11 @@ prepare.data.matrix <- function(
 
   nonzero.var <- function(x) {
     if (nrow(x) == 0) {
-      str(x)
+      print(str(x))
       stop("matrix has no rows")
     }
     if (ncol(x) == 0) {
-      str(x)
+      print(str(x))
       stop("matrix has no columns")
     }
     if ( is.numeric(x) ) {
