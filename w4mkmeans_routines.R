@@ -441,9 +441,9 @@ prepare.data.matrix <- function(
 # log-printing to stderr
 log_print <- function(x, ...) { 
   cat(
-    c(x, ...)
-  , " at "
-  , format(Sys.time(), "%a %d %b %Y %X")
+    format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+  , " "
+  , c(x, ...)
   , "\n"
   , sep=""
   , file=stderr()
