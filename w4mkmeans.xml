@@ -1,0 +1,233 @@
+﻿<tool id="w4mkmeans" name="Kmeans_for_W4M" version="0.98.1">
+  <description>[Metabolomics][W4M][LC-MS]Calculate K-means for dataMatrix features or samples</description>
+
+  <requirements>
+    <requirement type="package">r-base</requirement>
+    <requirement type="package">r-batch</requirement>
+  </requirements>
+
+  <stdio>
+    <exit_code range="1:" level="fatal" />
+  </stdio>
+
+
+  <command detect_errors="aggressive"><![CDATA[
+  Rscript $__tool_directory__/w4mkmeans_wrapper.R
+    data_matrix_path '$dataMatrix_in'
+    variable_metadata_path '$variableMetadata_in'
+    sample_metadata_path '$sampleMetadata_in'
+    kfeatures '$kfeatures'
+    ksamples '$ksamples'
+    iter_max '$itermax'
+    nstart '$nstart'
+    algorithm '$algorithm'
+    scores '$scores'
+    sampleMetadata_out '$sampleMetadata_out'
+    variableMetadata_out '$variableMetadata_out'
+    slots "\${GALAXY_SLOTS:-1}"
+  ; echo exit code $?
+  ]]></command>
+
+  <inputs>
+    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample, decimal: '.', missing: NA, mode: numerical, separator: tab" />
+    <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns, separator: tab" />
+    <param name="variableMetadata_in" label="Variable metadata file" type="data" format="tabular" help="variable x metadata columns, separator: tab" />
+    <param name="kfeatures" label="K value(s) for features" type="text" value = "0" help="Single or min,max value(s) for K for features (variables), or 0 for none." />
+    <param name="ksamples" label="K value(s) for samples" type="text" value = "0" help="Single or min,max value(s) for K for samples, or 0 for none." />
+    <param name="iter_max" label="Max number of iterations" type="text" value = "10" help="The maximum number of iterations allowed; default 10." />
+    <param name="nstart" label="Number of random sets" type="text" value = "1" help="How many random sets should be chosen; default 1." />
+	<param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd', see stats::kmeans reference for further info and references.">
+	  <option value="Hartigan-Wong" selected="TRUE">Hartigan-Wong</option>
+	  <option value="Lloyd">Lloyd</option>
+	  <option value="MacQueen">MacQueen</option>
+	  <option value="Forgy">Forgy</option>
+	</param>
+  </inputs>
+  <outputs>
+    <data name="sampleMetadata_out" label="${tool.name}_${sampleMetadata_in.name}" format="tabular" ></data>
+    <data name="variableMetadata_out" label="${tool.name}_${variableMetadata_in.name}" format="tabular" ></data>
+    <data name="scores_out" label="${tool.name}__${dataMatrix_in.name}_scores" format="tabular" ></data>
+  </outputs>
+
+  <tests>
+  </tests>
+
+
+
+	<help>
+		<![CDATA[
+
+**Author** - Arthur Eschenlauer (University of Minnesota, esch0041@umn.edu)
+
+---------------------------------------------------------------------------
+
+
+** Source ** - The source code for the w4mkmeans tool is available (from the Hegeman lab github repository) at https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper.
+
+** R code used ** - The R code invoked by this wrapper is the R 'stats::kmeans' package documented at https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**Tool updates**
+
+See the **NEWS** section at the bottom of this page
+
+---------------------------------------------------
+
+===========================
+K-means for W4M data matrix
+===========================
+
+-----------
+Description
+-----------
+
+Calculdate K-means for features clusters (or samples, or both for W4M dataMatrix (i.e., XCMS-preprocessed data files as input).
+
+
+
+-----------------
+Workflow Position
+-----------------
+
+  - Upstream tool category: Preprocessing
+  - Downstream tool categories: Statistical Analysis
+
+
+----------
+Motivation
+----------
+
+This tool clusters features (variables), samples, or both from the W4M dataMatrix and writes the results to new columns in variableMetadata, sampleMetadata, or both, respectively.
+If a range of K is supplied, then one column is added for each member within the range.
+Note that this clustering is **not** hierarchical; each member of a cluster is not a member of any other cluster.
+
+  - For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
+  - For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
+
+
+-----------
+Input files
+-----------
+
++---------------------------+------------+
+| File                      |   Format   |
++===========================+============+
+|     Data matrix           |   tabular  |
++---------------------------+------------+
+|     Sample metadata       |   tabular  |
++---------------------------+------------+
+|     Variable metadata     |   tabular  |
++---------------------------+------------+
+
+
+----------
+Parameters
+----------
+
+**Data matrix** - input-file dataset
+	| variable x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
+	|
+
+**Sample metadata** - input-file dataset
+	| sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
+	|
+
+**Feature metadata** - input-file dataset
+	| variable x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+	|
+
+**kfeatures** - K or K-range for features (default = 0)
+	| integer (single K) or minimumInteger,maximumInteger (K-range); zero (or less) will result in no calculation.
+	|
+
+**ksamples** - K or K-range for samples (default = 0)
+	| integer (single K) or minimumInteger,maximumInteger (K-range); zero (or less) will result in no calculation.
+	|
+
+**iter_max** - maximum_iterations (default = 10)
+	| maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+	|
+
+**nstart** - how many random sets should be chosen (default = 1)
+	| maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+	|
+
+------------
+Output files
+------------
+
+sampleMetadata
+	| (tabular separated values) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
+	| 'kmscN' - cluster number for clustering samples with K = N
+	|
+
+variableMetadata
+	| (tabular separated values) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
+	| 'kmfcN' - cluster number for clustering features with K = N
+	|
+
+scores
+    | (tabular separated values) file with one line for each K.
+	| 'clusterOn' - what was clustered - either 'sample' or 'feature'
+	| 'k' - the chosen K for clustering
+	| 'totalSS' - total ('between' plus total of 'within') sum of squares
+	| 'betweenSS' - 'between' sum of squares
+	| 'proportion' - betweenSS / totalSS
+	|
+
+---------------
+Working example
+---------------
+
+**Input files**
+
++-------------------+----------------------------------------------------------------------------------------------------------------+
+| Input File        | Download from URL                                                                                              |
++===================+================================================================================================================+
+| Data matrix       | https://raw.githubusercontent.com/HegemanLab/w4mclstrpeakpics/master/tests/testthat/input_dataMatrix.tsv       |
++-------------------+----------------------------------------------------------------------------------------------------------------+
+| Sample metadata   | https://raw.githubusercontent.com/HegemanLab/w4mclstrpeakpics/master/tests/testthat/input_sampleMetadata.tsv   |
++-------------------+----------------------------------------------------------------------------------------------------------------+
+| Variable metadata | https://raw.githubusercontent.com/HegemanLab/w4mclstrpeakpics/master/tests/testthat/input_variableMetadata.tsv |
++-------------------+----------------------------------------------------------------------------------------------------------------+
+
+**Other input parameters**
+
++-----------------+---------------+
+| Input Parameter | Value         |
++=================+===============+
+| kfeatures       | 5,7           |
++-----------------+---------------+
+| ksamples        | 5,6           |
++-----------------+---------------+
+| iter_max        | 10            |
++-----------------+---------------+
+| nstart          | 1             |
++-----------------+---------------+
+| algorithm       | Hartigan-Wong |
++-----------------+---------------+
+
+
+    ]]>
+  </help>
+  <citations>
+	<!-- W4M 3.0 -->
+    <citation type="doi">10.1016/j.biocel.2017.07.002</citation>
+	<!-- W4M 2.5 -->
+    <citation type="doi">10.1093/bioinformatics/btu813</citation>
+	<citation type="bibtex"><![CDATA[
+@Manual{,
+  title = {stats::kmeans - K-Means Clustering},
+  author = {{R Core Team}},
+  organization = {R Foundation for Statistical Computing},
+  address = {Vienna, Austria},
+  year = {2017},
+  url = {https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html},
+}
+	]]></citation>
+  </citations>
+  <!--
+     vim:noet:sw=4:ts=4
+--> </tool>
