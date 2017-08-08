@@ -324,10 +324,6 @@ if ( length(result) == 0 ) {
   log_print(sprintf("unexpected result keys %s", names(result)))
   # exit with status code non-zero to indicate error
   q(save = "no", status = 1, runLast = FALSE)
-} else if ( ! write_result(result = result$scores, file_path = scores_out, kind_string = "cluster scores")$success ) {
-  log_print("failed to write output file for cluster scores")
-  # exit with status code non-zero to indicate error
-  q(save = "no", status = 1, runLast = FALSE)
 } else if ( ! write_result(result = result$variableMetadata, file_path = variableMetadata_out, kind_string = "clustered variableMetadata")$success ) {
   log_print("failed to write output file for clustered variableMetadata")
   # exit with status code non-zero to indicate error
@@ -336,6 +332,19 @@ if ( length(result) == 0 ) {
   log_print("failed to write output file for clustered sampleMetadata")
   # exit with status code non-zero to indicate error
   q(save = "no", status = 1, runLast = FALSE)
+} else {
+  tryCatch(
+    expr = {
+      fileConn<-file(scores_out)
+      writeLines(result$scores, fileConn)
+      close(fileConn)
+    }
+  , error = function(e) {
+      log_print(sprintf("failed to write output file for cluster scores - %s", format_error(e)))
+      # exit with status code non-zero to indicate error
+      q(save = "no", status = 1, runLast = FALSE)
+    }
+  )
 }
 
 ##--------
