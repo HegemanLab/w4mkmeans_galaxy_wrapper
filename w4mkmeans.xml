@@ -2,8 +2,8 @@
   <description>Calculate K-means for dataMatrix features or samples</description>
 
   <requirements>
-    <requirement type="package">r-base</requirement>
-    <requirement type="package">r-batch</requirement>
+    <requirement type="package" version="3.3.2">r-base</requirement>
+    <requirement type="package" version="1.1_4">r-batch</requirement>
   </requirements>
 
   <stdio>
@@ -82,9 +82,9 @@
 ---------------------------------------------------------------------------
 
 
-** Source ** - The source code for the w4mkmeans tool is available (from the Hegeman lab github repository) at https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper.
+**Source** - The source code for the w4mkmeans tool is available (from the Hegeman lab github repository) at https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper.
 
-** R code used ** - The R code invoked by this wrapper is the R 'stats::kmeans' package documented at https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html
+**R code used** - The R code invoked by this wrapper is the R 'stats::kmeans' package documented at https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
