@@ -1,5 +1,5 @@
 categories: [Metabolomics]
-description: [W4M][Metabolomics]Calculate k-means for samples or features from data matrix
+description: '[W4M][Metabolomics]Calculate k-means for samples or features from data matrix'
 homepage_url: https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper
 long_description: Using the intensities in the dataMatrix, calculate the k-means clusters for samples or features and add them as columns to sampleMetadata or featureMetadata, respectively.
 name: w4mkmeans
