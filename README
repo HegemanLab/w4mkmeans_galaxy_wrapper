@@ -1,0 +1,2 @@
+# w4mkmeans_galaxy_wrapper
+Planemo-based galaxy-tool-wrapper to wrap the stats::kmeans R package for the W4M dataMatrix
