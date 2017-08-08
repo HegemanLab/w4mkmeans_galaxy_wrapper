@@ -12,20 +12,21 @@
 
 
   <command detect_errors="aggressive"><![CDATA[
-  Rscript $__tool_directory__/w4mkmeans_wrapper.R
-    data_matrix_path '$dataMatrix_in'
-    variable_metadata_path '$variableMetadata_in'
-    sample_metadata_path '$sampleMetadata_in'
-    kfeatures '$kfeatures'
-    ksamples '$ksamples'
-    iter_max '$itermax'
-    nstart '$nstart'
-    algorithm '$algorithm'
-    scores '$scores'
-    sampleMetadata_out '$sampleMetadata_out'
-    variableMetadata_out '$variableMetadata_out'
-    slots "\${GALAXY_SLOTS:-1}"
-  ; echo exit code $?
+    Rscript $__tool_directory__/w4mkmeans_wrapper.R
+      tool_directory $__tool_directory__
+      data_matrix_path '$dataMatrix_in'
+      variable_metadata_path '$variableMetadata_in'
+      sample_metadata_path '$sampleMetadata_in'
+      kfeatures '$kfeatures'
+      ksamples '$ksamples'
+      iter_max '$iter_max'
+      nstart '$nstart'
+      algorithm '$algorithm'
+      scores_out '$scores_out'
+      sampleMetadata_out '$sampleMetadata_out'
+      variableMetadata_out '$variableMetadata_out'
+      slots "\${GALAXY_SLOTS:-1}"
+    ; echo exit code $?
   ]]></command>
 
   <inputs>
@@ -36,17 +37,17 @@
     <param name="ksamples" label="K value(s) for samples" type="text" value = "0" help="Single or min,max value(s) for K for samples, or 0 for none." />
     <param name="iter_max" label="Max number of iterations" type="text" value = "10" help="The maximum number of iterations allowed; default 10." />
     <param name="nstart" label="Number of random sets" type="text" value = "1" help="How many random sets should be chosen; default 1." />
-	<param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd', see stats::kmeans reference for further info and references.">
-	  <option value="Hartigan-Wong" selected="TRUE">Hartigan-Wong</option>
-	  <option value="Lloyd">Lloyd</option>
-	  <option value="MacQueen">MacQueen</option>
-	  <option value="Forgy">Forgy</option>
-	</param>
+    <param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd', see stats::kmeans reference for further info and references.">
+      <option value="Forgy">Forgy</option>
+      <option value="Hartigan-Wong" selected="True">Hartigan-Wong</option>
+      <option value="Lloyd">Lloyd</option>
+      <option value="MacQueen">MacQueen</option>
+    </param>
   </inputs>
   <outputs>
     <data name="sampleMetadata_out" label="${tool.name}_${sampleMetadata_in.name}" format="tabular" ></data>
     <data name="variableMetadata_out" label="${tool.name}_${variableMetadata_in.name}" format="tabular" ></data>
-    <data name="scores_out" label="${tool.name}__${dataMatrix_in.name}_scores" format="tabular" ></data>
+    <data name="scores_out" label="${tool.name}_${dataMatrix_in.name}.kmeans" format="tabular" ></data>
   </outputs>
 
   <tests>
@@ -54,8 +55,8 @@
 
 
 
-	<help>
-		<![CDATA[
+  <help>
+    <![CDATA[
 
 **Author** - Arthur Eschenlauer (University of Minnesota, esch0041@umn.edu)
 
@@ -127,55 +128,55 @@ Parameters
 ----------
 
 **Data matrix** - input-file dataset
-	| variable x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
-	|
+    | variable x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
+    |
 
 **Sample metadata** - input-file dataset
-	| sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
-	|
+    | sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
+    |
 
 **Feature metadata** - input-file dataset
-	| variable x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
-	|
+    | variable x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+    |
 
-**kfeatures** - K or K-range for features (default = 0)
-	| integer (single K) or minimumInteger,maximumInteger (K-range); zero (or less) will result in no calculation.
-	|
+**kfeatures** - K or K's for features (default = 0)
+    | integer or comma-separated integers ; zero (the default) or less will result in no calculation.
+    |
 
 **ksamples** - K or K-range for samples (default = 0)
-	| integer (single K) or minimumInteger,maximumInteger (K-range); zero (or less) will result in no calculation.
-	|
+    | integer or comma-separated integers ; zero (the default) or less will result in no calculation.
+    |
 
 **iter_max** - maximum_iterations (default = 10)
-	| maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
-	|
+    | maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+    |
 
 **nstart** - how many random sets should be chosen (default = 1)
-	| maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
-	|
+    | maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+    |
 
 ------------
 Output files
 ------------
 
 sampleMetadata
-	| (tabular separated values) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
-	| 'kmscN' - cluster number for clustering samples with K = N
-	|
+    | (tabular separated values) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
+    | 'kmscN' - cluster number for clustering samples with K = N
+    |
 
 variableMetadata
-	| (tabular separated values) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
-	| 'kmfcN' - cluster number for clustering features with K = N
-	|
+    | (tabular separated values) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
+    | 'kmfcN' - cluster number for clustering features with K = N
+    |
 
 scores
     | (tabular separated values) file with one line for each K.
-	| 'clusterOn' - what was clustered - either 'sample' or 'feature'
-	| 'k' - the chosen K for clustering
-	| 'totalSS' - total ('between' plus total of 'within') sum of squares
-	| 'betweenSS' - 'between' sum of squares
-	| 'proportion' - betweenSS / totalSS
-	|
+    | 'clusterOn' - what was clustered - either 'sample' or 'feature'
+    | 'k' - the chosen K for clustering
+    | 'totalSS' - total ('between' plus total of 'within') sum of squares
+    | 'betweenSS' - 'between' sum of squares
+    | 'proportion' - betweenSS / totalSS
+    |
 
 ---------------
 Working example
@@ -183,24 +184,24 @@ Working example
 
 **Input files**
 
-+-------------------+----------------------------------------------------------------------------------------------------------------+
-| Input File        | Download from URL                                                                                              |
-+===================+================================================================================================================+
-| Data matrix       | https://raw.githubusercontent.com/HegemanLab/w4mclstrpeakpics/master/tests/testthat/input_dataMatrix.tsv       |
-+-------------------+----------------------------------------------------------------------------------------------------------------+
-| Sample metadata   | https://raw.githubusercontent.com/HegemanLab/w4mclstrpeakpics/master/tests/testthat/input_sampleMetadata.tsv   |
-+-------------------+----------------------------------------------------------------------------------------------------------------+
-| Variable metadata | https://raw.githubusercontent.com/HegemanLab/w4mclstrpeakpics/master/tests/testthat/input_variableMetadata.tsv |
-+-------------------+----------------------------------------------------------------------------------------------------------------+
++-------------------+-------------------------------------------------------------------------------------------------------------------+
+| Input File        | Download from URL                                                                                                 |
++===================+===================================================================================================================+
+| Data matrix       | https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/input_dataMatrix.tsv       |
++-------------------+-------------------------------------------------------------------------------------------------------------------+
+| Sample metadata   | https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/input_sampleMetadata.tsv   |
++-------------------+-------------------------------------------------------------------------------------------------------------------+
+| Variable metadata | https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/input_variableMetadata.tsv |
++-------------------+-------------------------------------------------------------------------------------------------------------------+
 
 **Other input parameters**
 
 +-----------------+---------------+
 | Input Parameter | Value         |
 +=================+===============+
-| kfeatures       | 5,7           |
+| kfeatures       | 5,6,7         |
 +-----------------+---------------+
-| ksamples        | 5,6           |
+| ksamples        | 3,4           |
 +-----------------+---------------+
 | iter_max        | 10            |
 +-----------------+---------------+
@@ -209,25 +210,86 @@ Working example
 | algorithm       | Hartigan-Wong |
 +-----------------+---------------+
 
+---------
+Citations
+---------
 
     ]]>
   </help>
   <citations>
-	<!-- W4M 3.0 -->
-    <citation type="doi">10.1016/j.biocel.2017.07.002</citation>
-	<!-- W4M 2.5 -->
-    <citation type="doi">10.1093/bioinformatics/btu813</citation>
-	<citation type="bibtex"><![CDATA[
-@Manual{,
+    <citation type="bibtex"><![CDATA[
+@incollection{RCoreTeam2017,
   title = {stats::kmeans - K-Means Clustering},
+  booktitle = {R: A Language and Environment for Statistical Computing},
   author = {{R Core Team}},
-  organization = {R Foundation for Statistical Computing},
+  publisher = {R Foundation for Statistical Computing},
   address = {Vienna, Austria},
   year = {2017},
   url = {https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html},
 }
-	]]></citation>
+    ]]></citation>
+    <!-- Forgy algorithm -->
+    <citation type="bibtex"><![CDATA[
+@article{forgy65,
+  added-at = {2006-03-23T12:22:43.000+0100},
+  author = {Forgy, E.},
+  biburl = {https://www.bibsonomy.org/bibtex/21e31409932ce91df646c4731350e1207/hotho},
+  interhash = {c86383cba8cfe00d5e6ef200016aca3f},
+  intrahash = {1e31409932ce91df646c4731350e1207},
+  journal = {Biometrics},
+  keywords = {clustering kmeans},
+  number = 3,
+  pages = {768-769},
+  timestamp = {2006-03-23T12:22:43.000+0100},
+  title = {Cluster Analysis of Multivariate Data: Efficiency versus Interpretability of Classification},
+  volume = 21,
+  year = 1965
+}
+    ]]></citation>
+    <!-- W4M 3.0 - Guitton et al. 2017-->
+    <citation type="doi">10.1016/j.biocel.2017.07.002</citation>
+    <!-- W4M 2.5 - Giacomini et al. 2014 -->
+    <citation type="doi">10.1093/bioinformatics/btu813</citation>
+    <!-- Hartigan and Wong algorithm -->
+    <citation type="bibtex"><![CDATA[
+@article{Hartigan79,
+  added-at = {2007-02-27T16:22:09.000+0100},
+  author = {Hartigan, J. and Wong, M.},
+  biburl = {https://www.bibsonomy.org/bibtex/23d8bfc440c5725783876929c022f67ce/pierpaolo.pk81},
+  description = {WSD},
+  interhash = {10d6d33920d9af578a4d0a556dc1477d},
+  intrahash = {3d8bfc440c5725783876929c022f67ce},
+  journal = {Applied Statistics},
+  keywords = {imported},
+  pages = {100-108},
+  timestamp = {2007-02-27T16:22:11.000+0100},
+  title = {Algorithm AS136: A k-means clustering algorithm},
+  volume = 28,
+  year = 1979
+}
+    ]]></citation>
+    <!-- Lloyd algorithm -->
+    <citation type="doi">10.1109/TIT.1982.1056489</citation>
+    <!-- MacQueen algorithm -->
+    <citation type="bibtex"><![CDATA[
+@inproceedings{MacQueen1967,
+  added-at = {2011-01-11T13:35:01.000+0100},
+  author = {MacQueen, J. B.},
+  biburl = {https://www.bibsonomy.org/bibtex/25dcdb8cd9fba78e0e791af619d61d66d/enitsirhc},
+  booktitle = {Proc. of the fifth Berkeley Symposium on Mathematical Statistics and Probability},
+  editor = {Cam, L. M. Le and Neyman, J.},
+  interhash = {8d7d4dfe7d3a06b8c9c3c2bb7aa91e28},
+  intrahash = {5dcdb8cd9fba78e0e791af619d61d66d},
+  keywords = {kmeans clustering},
+  pages = {281-297},
+  publisher = {University of California Press},
+  timestamp = {2011-01-11T13:35:01.000+0100},
+  title = {Some Methods for Classification and Analysis of MultiVariate Observations},
+  volume = 1,
+  year = 1967
+}
+    ]]></citation>
   </citations>
   <!--
-     vim:noet:sw=4:ts=4
+     vim:et:sw=2:ts=2:
 --> </tool>

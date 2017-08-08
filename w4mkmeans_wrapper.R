@@ -9,12 +9,13 @@
 
 # invocation:
 #   Rscript $__tool_directory__/w4mkmeans_wrapper.R \
+#     tool_directory $__tool_directory__
 #     data_matrix_path '$dataMatrix_in' \
 #     variable_metadata_path '$variableMetadata_in' \
 #     sample_metadata_path '$sampleMetadata_in' \
 #     kfeatures '$kfeatures' \
 #     ksamples '$ksamples' \
-#     iter_max '$itermax' \
+#     iter_max '$iter_max' \
 #     nstart '$nstart' \
 #     algorithm '$algorithm' \
 #     scores '$scores' \
@@ -42,22 +43,66 @@
 #   <data name="variableMetadata_out" label="${tool.name}_${variableMetadata_in.name}" format="tabular" ></data>
 # </outputs>
 
-##---------------
-## Initialization
-##---------------
-
-##----------
-## libraries
-##----------
+##------------------------
+## libraries for this file
+##------------------------
 
 library(batch) ## for 'parseCommandArgs'
 
-##---------------------------------------------------
-## Computation - general and module-specific routines
-##---------------------------------------------------
+##-------------------
+## Pre-initialization
+##-------------------
 
-source("w4m_general_purpose_routines.R")
-source("w4mkmeans_routines.R")
+argVc <- unlist(parseCommandArgs(evaluate=FALSE))
+if ( Reduce( `|`, grepl("tool_directory",names(argVc)) ) ) {
+  tool_directory <- as.character(argVc["tool_directory"])
+} else {
+  tool_directory <- "."
+}
+r_path <- function(f) paste( tool_directory, f, sep = "/" )
+
+##----------------------------------------------------------
+## Computation - source general and module-specific routines
+##----------------------------------------------------------
+
+log_print <- function(x, ...) { 
+  cat(
+    format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+  , " "
+  , c(x, ...)
+  , "\n"
+  , sep=""
+  , file=stderr()
+  )
+}
+
+# log_print(sprintf("tool_directory is %s", tool_directory))
+
+w4m_general_purpose_routines_path <- r_path("w4m_general_purpose_routines.R")
+# log_print(sprintf("w4m_general_purpose_routines_path is %s", w4m_general_purpose_routines_path))
+if ( ! file.exists(w4m_general_purpose_routines_path) ) {
+  log_print("cannot find file w4m_general_purpose_routines.R")
+  q(save = "no", status = 1, runLast = TRUE)
+}
+# log_print("sourcing ",w4m_general_purpose_routines_path)
+source(w4m_general_purpose_routines_path)
+if ( ! exists("prepare.data.matrix") ) {
+  log_print("'prepare.data.matrix' was not read from file w4m_general_purpose_routines.R")
+  q(save = "no", status = 1, runLast = TRUE)
+}
+
+w4mkmeans_routines_path <- r_path("w4mkmeans_routines.R")
+# log_print(sprintf("w4mkmeans_routines_path is %s", w4mkmeans_routines_path))
+if ( ! file.exists(w4mkmeans_routines_path) ) {
+  log_print("cannot find file w4mkmeans_routines.R")
+  q(save = "no", status = 1, runLast = TRUE)
+}
+# log_print("sourcing ",w4mkmeans_routines_path)
+source(w4mkmeans_routines_path)
+if ( ! exists("w4mkmeans") ) {
+  log_print("'w4mkmeans' was not read from file w4mkmeans_routines.R")
+  q(save = "no", status = 1, runLast = TRUE)
+}
 
 ##-----------------------------------------
 ## Computation - W4m data-suppport routines
@@ -187,8 +232,6 @@ read_input_failure_action <- function(x, ...) {
 
 modNamC <- "w4mkmeans" ## module name
 
-argVc <- unlist(parseCommandArgs(evaluate=FALSE))
-
 ## options
 ##--------
 
@@ -246,7 +289,7 @@ args_env$sample_metadata_path   <- as.character(argVc["sample_metadata_path"])
 args_env$kfeatures <- strsplit(x = as.character(argVc['kfeatures']), split = ",", fixed = TRUE)[[1]]
 args_env$ksamples  <- strsplit(x = as.character(argVc['ksamples' ]), split = ",", fixed = TRUE)[[1]]
 # numeric args
-args_env$iter_max  <- as.numeric(               argVc['itermax'  ])
+args_env$iter_max  <- as.numeric(               argVc['iter_max'  ])
 args_env$nstart    <- as.numeric(               argVc['nstart'   ])
 args_env$slots     <- as.numeric(               argVc['slots'    ])
 # string args
