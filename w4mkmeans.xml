@@ -238,6 +238,7 @@ Working example
 NEWS
 ----
 
+August 2017, Version 0.98.3 - Add (optional) prefix to category numbers for downstream tools that treat only non-numeric data as categorical.
 August 2017, Version 0.98.1 - First release
 
 ---------

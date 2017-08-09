@@ -64,14 +64,18 @@ w4mkmeans <- function(env) {
   sampleMetadata  <- env$sampleMetadata
   featureMetadata <- env$variableMetadata
   slots           <- env$slots
-  positive_ints <- function(a) {
-    i <- as.integer(a)       # may introduce NAs by coercion
-    i <- i[!is.na(i)]        # eliminate NAs
-    i <- i[i > 0]            # eliminate non-positive integers
-    return (unique(sort(i))) # return results, if any
+  positive_ints <- function(a, what) {
+    i <- as.integer(a)    # may introduce NAs by coercion
+    i <- i[!is.na(i)]     # eliminate NAs
+    i <- i[i > 0]         # eliminate non-positive integers
+    i <- unique(sort(i))  # eliminate redundancy and disorder
+    if (length(a)!=length(i)) {
+      failure_action("Some values for '", what, "' were skipped where not positive, not integer, or not unique")
+    }
+    return (i)            # return results, if any
   }
-  ksamples        <- positive_ints(env$ksamples)
-  kfeatures       <- positive_ints(env$kfeatures)
+  ksamples        <- positive_ints(env$ksamples , "ksamples")
+  kfeatures       <- positive_ints(env$kfeatures, "kfeatures")
 
   myLapply <- parLapply
   # uncomment the next line to mimic parLapply, but without parallelization (for testing/experimentation)
