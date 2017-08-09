@@ -34,7 +34,7 @@
     <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample, decimal: '.', missing: NA, mode: numerical, separator: tab" />
     <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns, separator: tab" />
     <param name="variableMetadata_in" label="Variable metadata file" type="data" format="tabular" help="variable x metadata columns, separator: tab" />
-    <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="k" help="Some tools require non-numeric values to discern categorical; e.g., enter 'k' here to prepend 'k' to cluster numbers in the output; default 'k'." />
+    <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="k" help="[categorical_prefix] Some tools require non-numeric values to discern categorical; e.g., enter 'k' here to prepend 'k' to cluster numbers in the output; default 'k'." />
     <param name="ksamples" label="K value(s) for samples" type="text" value = "0" help="[ksamples] Single K or comma-separated Ks for samples, or 0 for none." />
     <param name="kfeatures" label="K value(s) for features" type="text" value = "0" help="[kfeatures] Single K or comma-separated Ks for features (variables), or 0 for none." />
     <param name="iter_max" label="Max number of iterations" type="text" value = "10" help="[iter_max] The maximum number of iterations allowed; default 10." />
@@ -54,7 +54,7 @@
   </outputs>
 
   <tests>
-        <test>
+    <test>
       <param name="dataMatrix_in" value="input_dataMatrix.tsv"/>
       <param name="sampleMetadata_in" value="input_sampleMetadata.tsv"/>
       <param name="variableMetadata_in" value="input_variableMetadata.tsv"/>
@@ -177,6 +177,10 @@ Parameters
 **nstart** - how many random sets should be chosen (default = 1)
 
   - maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+
+**categorical_prefix** - character(s) to add as prefix to category number (default = 'k')
+
+  - some tools treat only non-numeric data as categorical; this prefix ('k' by default) ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
 
 ------------
 Output files
