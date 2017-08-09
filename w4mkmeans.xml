@@ -1,4 +1,4 @@
-﻿<tool id="w4mkmeans" name="w4mKmeans" version="0.98.2">
+﻿<tool id="w4mkmeans" name="w4mKmeans" version="0.98.3">
   <description>Calculate K-means for W4M dataMatrix features or samples</description>
 
   <requirements>
