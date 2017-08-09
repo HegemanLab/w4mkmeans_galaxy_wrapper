@@ -70,7 +70,7 @@ w4mkmeans <- function(env) {
     i <- i[i > 0]         # eliminate non-positive integers
     i <- unique(sort(i))  # eliminate redundancy and disorder
     if (length(a)!=length(i)) {
-      failure_action("Some values for '", what, "' were skipped where not positive, not integer, or not unique")
+      failure_action("Some values for '", what, "' were skipped where not unique, not positive, or not convertible to an integer.")
     }
     return (i)            # return results, if any
   }
