@@ -1,5 +1,5 @@
-﻿<tool id="w4mkmeans" name="Kmeans_for_W4M" version="0.98.1">
-  <description>Calculate K-means for dataMatrix features or samples</description>
+﻿<tool id="w4mkmeans" name="w4mKmeans" version="0.98.2">
+  <description>Calculate K-means for W4M dataMatrix features or samples</description>
 
   <requirements>
     <requirement type="package" version="3.3.2">r-base</requirement>
