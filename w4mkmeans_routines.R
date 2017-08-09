@@ -10,23 +10,24 @@ w4kmeans_usage <- function() {
      "w4mkmeans: bad input.",
      "# contract:",
      "    required - caller will provide an environment comprising:",
-     "      log_print        - a logging function with the signature function(x, ...) expecting strings as x and ...",
-     "      variableMetadata - the corresponding W4M data.frame having feature metadata",
-     "      sampleMetdata    - the corresponding W4M data.frame having sample metadata",
-     "      dataMatrix       - the corresponding W4M matrix",
-     "      slots            - the number of parallel slots for calculating kmeans",
+     "      log_print          - a logging function with the signature function(x, ...) expecting strings as x and ...",
+     "      variableMetadata   - the corresponding W4M data.frame having feature metadata",
+     "      sampleMetdata      - the corresponding W4M data.frame having sample metadata",
+     "      dataMatrix         - the corresponding W4M matrix",
+     "      slots              - the number of parallel slots for calculating kmeans",
      "    optional - environment may comprise:",
-     "      kfeatures        - an array of integers, the k's to apply for clustering by feature (default, empty array)",
-     "      ksamples         - an array of integers, the k's to apply for clustering by sample (default, empty array)",
-     "      iter.max         - the maximum number of iterations when calculating a cluster (default = 10)",
-     "      nstart           - how many random sets of centers should be chosen (default = 1)",
-     "      algorithm        - string from c('Hartigan-Wong', 'Lloyd', 'Forgy', 'MacQueen') (default = Hartigan-Wong)",
+     "      kfeatures          - an array of integers, the k's to apply for clustering by feature (default, empty array)",
+     "      ksamples           - an array of integers, the k's to apply for clustering by sample (default, empty array)",
+     "      iter.max           - the maximum number of iterations when calculating a cluster (default = 10)",
+     "      nstart             - how many random sets of centers should be chosen (default = 1)",
+     "      algorithm          - string from c('Hartigan-Wong', 'Lloyd', 'Forgy', 'MacQueen') (default = Hartigan-Wong)",
+     "      categorical_prefix - string from c('Hartigan-Wong', 'Lloyd', 'Forgy', 'MacQueen') (default = Hartigan-Wong)",
      "      ",
      "    this routine will return a list comprising:",
-     "      variableMetadata - the input variableMetadata data.frame with updates, if any",
-     "      sampleMetadata   - the input sampleMetadata data.frame with updates, if any",
-     "      scores           - an array of strings, each representing a line of a tsv having the following header:",
-     "                           clusterOn TAB k TAB totalSS TAB betweenSS TAB proportion"
+     "      variableMetadata   - the input variableMetadata data.frame with updates, if any",
+     "      sampleMetadata     - the input sampleMetadata data.frame with updates, if any",
+     "      scores             - an array of strings, each representing a line of a tsv having the following header:",
+     "                             clusterOn TAB k TAB totalSS TAB betweenSS TAB proportion"
     )
   )
 }
@@ -37,11 +38,12 @@ w4mkmeans <- function(env) {
     lapply(w4kmeans_usage(),print)
   } 
   # supply default arguments
-  if ( ! exists("iter.max" , env) ) env$iter.max  <- 10
-  if ( ! exists("nstart"   , env) ) env$nstart    <- 1
-  if ( ! exists("algorithm", env) ) env$algorithm <- 'Hartigan-Wong'
-  if ( ! exists("ksamples" , env) ) env$ksamples  <- c()
-  if ( ! exists("kfeatures", env) ) env$kfeatures <- c()
+  if ( ! exists("iter.max"          , env) ) env$iter.max  <- 10
+  if ( ! exists("nstart"            , env) ) env$nstart    <- 1
+  if ( ! exists("algorithm"         , env) ) env$algorithm <- 'Hartigan-Wong'
+  if ( ! exists("categorical_prefix", env) ) env$categorical_prefix <- 'k'
+  if ( ! exists("ksamples"          , env) ) env$ksamples  <- c()
+  if ( ! exists("kfeatures"         , env) ) env$kfeatures <- c()
   # check mandatory arguments
   expected <- c(
     "log_print"
@@ -113,7 +115,7 @@ w4mkmeans <- function(env) {
         for ( i in 1:ksamples_length ) {
           result <- smpl_result_list[[i]]
           if (result$success) {
-            sampleMetadata[sprintf("k%d",ksamples[i])] <- result$value$clusters
+            sampleMetadata[sprintf("k%d",ksamples[i])] <- sprintf("%s%d", env$categorical_prefix, result$value$clusters)
             scores <- c(scores, result$value$scores)
           }
         }
@@ -132,7 +134,7 @@ w4mkmeans <- function(env) {
         for ( i in 1:kfeatures_length ) {
           result <- feat_result_list[[i]]
           if (result$success) {
-            featureMetadata[sprintf("k%d",kfeatures[i])] <- result$value$clusters
+            featureMetadata[sprintf("k%d",kfeatures[i])] <- sprintf("%s%d", env$categorical_prefix, result$value$clusters)
             scores <- c(scores, result$value$scores)
           }
         }

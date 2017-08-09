@@ -8,25 +8,26 @@
 #   - [parallel::clusterApply](https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/clusterApply.html)
 
 # invocation:
-#   Rscript $__tool_directory__/w4mkmeans_wrapper.R \
-#     tool_directory $__tool_directory__
-#     data_matrix_path '$dataMatrix_in' \
-#     variable_metadata_path '$variableMetadata_in' \
-#     sample_metadata_path '$sampleMetadata_in' \
-#     kfeatures '$kfeatures' \
-#     ksamples '$ksamples' \
-#     iter_max '$iter_max' \
-#     nstart '$nstart' \
-#     algorithm '$algorithm' \
-#     scores '$scores' \
-#     sampleMetadata_out '$sampleMetadata_out' \
-#     variableMetadata_out '$variableMetadata_out' \
-#     slots "\${GALAXY_SLOTS:-1}" \
+#   Rscript w4mkmeans_wrapper.R \
+#     algorithm "$algorithm" \
+#     categorical_prefix "$categorical_prefix" \
+#     data_matrix_path "$dataMatrix_in" \
+#     iter_max "$iter_max" \
+#     kfeatures "$kfeatures" \
+#     ksamples "$ksamples" \
+#     nstart "$nstart" \
+#     sampleMetadata_out "$sampleMetadata_out" \
+#     sample_metadata_path "$sampleMetadata_in" \
+#     scores_out "$scores_out" \
+#     slots "${GALAXY_SLOTS:-1}" \
+#     variableMetadata_out "$variableMetadata_out" \
+#     variable_metadata_path "$variableMetadata_in"
 # 
 # <inputs>
 #   <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample, decimal: '.', missing: NA, mode: numerical, separator: tab" />
 #   <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns, separator: tab" />
 #   <param name="variableMetadata_in" label="Variable metadata file" type="data" format="tabular" help="variable x metadata columns, separator: tab" />
+#   <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="k" help="Some tools require non-numeric values to discern categorical; e.g., enter 'k' here to prepend 'k' to cluster numbers in the output; default 'k'." />
 #   <param name="kfeatures" label="K value(s) for features" type="text" value="0" help="Single or min,max value(s) for K for features (variables), or 0 for none." />
 #   <param name="ksamples" label="K value(s) for samples" type="text" value="0" help="Single or min,max value(s) for K for samples, or 0 for none." />
 #   <param name="iter_max" label="Max number of iterations" type="text" value="10" help="The maximum number of iterations allowed; default 10." />
@@ -294,6 +295,10 @@ args_env$nstart    <- as.numeric(               argVc['nstart'   ])
 args_env$slots     <- as.numeric(               argVc['slots'    ])
 # string args
 args_env$algorithm <- as.character(             argVc['algorithm'])
+args_env$categorical_prefix <- as.character(    argVc['categorical_prefix'])
+
+
+# make local 'log_print' function available through 'env'
 args_env$log_print <- log_print
 
 log_print("PARAMETERS (parsed):")

@@ -8,23 +8,23 @@
               iter_max="10"
                nstart="1"
             algorithm="Hartigan-Wong"
+   categorical_prefix="_"
            scores_out="test-data/output_scores.tsv"
    sampleMetadata_out="test-data/output_sampleMetadata.tsv"
  variableMetadata_out="test-data/output_variableMetadata.tsv"
          GALAXY_SLOTS=3
 
 Rscript w4mkmeans_wrapper.R \
-data_matrix_path "$dataMatrix_in" \
-variable_metadata_path "$variableMetadata_in" \
-sample_metadata_path "$sampleMetadata_in" \
-ksamples "$ksamples" \
-kfeatures "$kfeatures" \
-iter_max "$iter_max" \
-nstart "$nstart" \
-algorithm "$algorithm" \
-scores_out "$scores_out" \
-sampleMetadata_out "$sampleMetadata_out" \
-variableMetadata_out "$variableMetadata_out" \
-slots "${GALAXY_SLOTS:-1}"
-
-
+  algorithm "$algorithm" \
+  categorical_prefix "$categoricalPrefix" \
+  data_matrix_path "$dataMatrix_in" \
+  iter_max "$iter_max" \
+  kfeatures "$kfeatures" \
+  ksamples "$ksamples" \
+  nstart "$nstart" \
+  sampleMetadata_out "$sampleMetadata_out" \
+  sample_metadata_path "$sampleMetadata_in" \
+  scores_out "$scores_out" \
+  slots "${GALAXY_SLOTS:-1}" \
+  variableMetadata_out "$variableMetadata_out" \
+  variable_metadata_path "$variableMetadata_in"
