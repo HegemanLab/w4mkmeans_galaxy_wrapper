@@ -63,9 +63,15 @@ w4mkmeans <- function(env) {
   scores          <- c( "clusterOn\tk\ttotalSS\tbetweenSS\tproportion" )
   sampleMetadata  <- env$sampleMetadata
   featureMetadata <- env$variableMetadata
-  ksamples        <- as.numeric(env$ksamples)
-  kfeatures       <- as.numeric(env$kfeatures)
   slots           <- env$slots
+  positive_ints <- function(a) {
+    i <- as.integer(a) # may introduce NAs by coercion
+    i <- i[!is.na(i)]  # eliminate NAs
+    i <- i[i > 0]      # eliminate non-positive integers
+    return (i)         # return results, if any
+  }
+  ksamples        <- positive_ints(env$ksamples)
+  kfeatures       <- positive_ints(env$kfeatures)
 
   myLapply <- parLapply
   # uncomment the next line to mimic parLapply, but without parallelization (for testing/experimentation)
