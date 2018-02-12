@@ -1,14 +1,15 @@
-# w4mkmeans_galaxy_wrapper
-Planemo-based galaxy-tool-wrapper to wrap the `stats::kmeans` R package for clustering the W4M dataMatrix.
+# w4mkmeans
+
+w4mkmeans is a planemo-based galaxy-tool-wrapper to wrap the `stats::kmeans` R package for clustering the W4M dataMatrix.
 
 ## Roles of files here:
-- run_test.sh - set up and run `planemo test`
-- run_serve.sh - set up and run `planemo serve`
-- run_wrapper.sh - invoke w4mkmeans_wrapper.R
-- w4mkmeans.xml - presentation layer
-- w4mkmeans_wrapper.R - Galaxy-specific code
-- w4mkmeans_routines.R - Galaxy-independent code to invoke `stats::kmeans`
-- w4m_general_purpose_routines.R - some reusable utilities specific to the W4M / XCMS data formats
+- `run_test.sh` - set up and run `planemo test`
+- `run_serve.sh` - set up and run `planemo serve`
+- `run_wrapper.sh` - invoke `w4mkmeans_wrapper.R`
+- `w4mkmeans.xml` - presentation layer
+- `w4mkmeans_wrapper.R` - Galaxy-specific code
+- `w4mkmeans_routines.R` - Galaxy-independent code to invoke `stats::kmeans`
+- `w4m_general_purpose_routines.R` - some reusable utilities specific to the W4M / XCMS data formats
 
 # Tool usage details
 
@@ -34,7 +35,7 @@ See the **NEWS** section at the bottom of this page
 
 Calculate K-means for sample-clusters \(or feature-clusters, or both\) using W4M dataMatrix \(i.e., XCMS-preprocessed data files\) as input.
 
-_Please note that XCMS refers to features as 'variables'. This documentation does not use either term consistently._
+_Please note that XCMS refers to features as 'variables'. This documentation generally refers to them as features._
 
 ## Workflow Position
 
@@ -133,7 +134,15 @@ This tool clusters samples, features \(variables\), or both from the W4M dataMat
 
 ## NEWS
 
+August 2017, Version 0.98.3 - Feature-tuning release
+ 
+  - Add (optional) prefix to category numbers for downstream tools that treat only non-numeric data as categorical.
+  - Accept as possible K only unique numbers convertible to integer; discard others without failing.
+  - Published to the Galaxy toolshed [https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/02cafb660b72](https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/02cafb660b72)
+
 August 2017, Version 0.98.1 - First release
+
+  - Published to the Galaxy toolshed [https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/6ccbe18131a6](https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/6ccbe18131a6)
 
 ## Citations
 
