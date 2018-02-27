@@ -78,13 +78,18 @@ w4mkmeans <- function(env) {
   kfeatures       <- positive_ints(env$kfeatures, "kfeatures")
 
   myLapply <- parLapply
-  # uncomment the next line to mimic parLapply, but without parallelization (for testing/experimentation)
-  # myLapply <- function(cl, ...) lapply(...)
   cl <- NULL
+  tryCatch(
+    expr = {
+      cl <- makePSOCKcluster(names = slots)
+    }
+    , error = function(e) {
+      # mimic parLapply, but without parallelization (as a last resort)
+      myLapply <<- function(cl, ...) lapply(...)
+    }
+  )
   if ( identical(myLapply, parLapply) ) {
     failure_action(sprintf("w4mkmeans: using parallel evaluation with %d slots", slots))
-    failure_action(names(cl))
-    cl <- makePSOCKcluster(names = slots)
     # from ?makePSOCKcluster: "It is good practice to shut down the workers by calling stopCluster."
     clusterExport(
       cl = cl
