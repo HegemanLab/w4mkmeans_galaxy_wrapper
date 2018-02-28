@@ -14,6 +14,11 @@ log_print <- function(x, ...) {
   )
 }
 
+# format error for logging
+format_error <- function(e) {
+  paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
+}
+
 # tryCatchFunc produces a list
 #   func - a function that takes no arguments
 #   On success of func(), tryCatchFunc produces
@@ -21,10 +26,6 @@ log_print <- function(x, ...) {
 #   On failure of func(), tryCatchFunc produces
 #     list(success = FALSE, value = NA, msg = "the error message")
 tryCatchFunc <- function(func) {
-  # format error for logging
-  format_error <- function(e) {
-    paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
-  }
   retval <- NULL
   tryCatch(
     expr = {
@@ -183,11 +184,9 @@ prepare.data.matrix <- function(
 
   nonzero.var <- function(x) {
     if (nrow(x) == 0) {
-      print(str(x))
       stop("matrix has no rows")
     }
     if (ncol(x) == 0) {
-      print(str(x))
       stop("matrix has no columns")
     }
     if ( is.numeric(x) ) {

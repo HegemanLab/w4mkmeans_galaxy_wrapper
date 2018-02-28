@@ -4,11 +4,11 @@
 
 library(parallel)
 
-w4kmeans_usage <- function() {
+w4mkmeans_usage <- function() {
   return (
     c(
      "w4mkmeans: bad input.",
-     "# contract:",
+     "  contract:",
      "    required - caller will provide an environment comprising:",
      "      log_print          - a logging function with the signature function(x, ...) expecting strings as x and ...",
      "      variableMetadata   - the corresponding W4M data.frame having feature metadata",
@@ -27,8 +27,7 @@ w4kmeans_usage <- function() {
      "      variableMetadata   - the input variableMetadata data.frame with updates, if any",
      "      sampleMetadata     - the input sampleMetadata data.frame with updates, if any",
      "      scores             - an array of strings, each representing a line of a tsv having the following header:",
-     "                             clusterOn TAB k TAB totalSS TAB betweenSS TAB proportion",
-     "      logs               - an array of message logged by the worker threads"
+     "                             clusterOn TAB k TAB totalSS TAB betweenSS TAB proportion"
     )
   )
 }
@@ -36,8 +35,10 @@ w4kmeans_usage <- function() {
 w4mkmeans <- function(env) {
   # abort if 'env' is null or is not an environment
   if ( is.null(env) || ! is.environment(env) ) {
-    lapply(w4kmeans_usage(),print)
+    lapply(w4mkmeans_usage(),print)
   }
+  # extract parameters from 'env'
+  log_action  <- env$log_print
   # supply default arguments
   if ( ! exists("iter.max"          , env) ) env$iter.max  <- 10
   if ( ! exists("nstart"            , env) ) env$nstart    <- 1
@@ -56,12 +57,11 @@ w4mkmeans <- function(env) {
   missing_from_env <- setdiff(expected, (ls(env)))
   if ( length(missing_from_env) > 0 ) {
     print(paste(c('expected environment members not found: ', as.character(missing_from_env)), collapse = ", "))
-    lapply(w4kmeans_usage(),print)
+    lapply(w4mkmeans_usage(),log_action)
     stop("w4mkmeans: contract has been broken")
   }
   # extract parameters from 'env'
   log_action  <- env$log_print
-  logs            <- c()
   scores          <- c( "clusterOn\tk\ttotalSS\tbetweenSS\tproportion" )
   sampleMetadata  <- env$sampleMetadata
   featureMetadata <- env$variableMetadata
@@ -100,7 +100,6 @@ w4mkmeans <- function(env) {
     stop(postmortem)
   }
 
-  str(preparation_result)
   env$preparedDataMatrix <- preparation_result$value
 
   myLapply <- parLapply
@@ -123,6 +122,7 @@ w4mkmeans <- function(env) {
       cl = cl
     , varlist = c(
         "tryCatchFunc"
+      , "format_error"
       , "calc_kmeans_one_dimension_one_k"
       , "prepare.data.matrix"
       )
@@ -160,7 +160,6 @@ w4mkmeans <- function(env) {
           if (result$success) {
             sampleMetadata[sprintf("k%d",ksamples[i])] <- sprintf("%s%d", env$categorical_prefix, result$value$clusters)
             scores <- c(scores, result$value$scores)
-            logs <- c(logs, result$value$logs)
           }
         }
       }
@@ -180,7 +179,6 @@ w4mkmeans <- function(env) {
           if (result$success) {
             featureMetadata[sprintf("k%d",kfeatures[i])] <- sprintf("%s%d", env$categorical_prefix, result$value$clusters)
             scores <- c(scores, result$value$scores)
-            logs <- c(logs, result$value$logs)
           }
         }
       }
@@ -190,7 +188,6 @@ w4mkmeans <- function(env) {
           variableMetadata = featureMetadata
         , sampleMetadata   = sampleMetadata
         , scores           = scores
-        , logs             = logs
         )
       )
     }
@@ -229,7 +226,7 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
       || ! Reduce( f =`|`, x = sapply(X = c("features","samples"), FUN = `==`, dimension), init = FALSE) ) {
     stop("calc_kmeans_one_dimension_one_k - argument 'dimension' is neither 'features' nor 'samples'")
   }
-  dm           <- env$dataMatrix
+  dm           <- env$preparedDataMatrix
   iter.max     <- env$iter.max
   nstart       <- env$nstart
   algorithm    <- env$algorithm
@@ -244,12 +241,6 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
     # - to calculate sample-clusters, no transposition is needed because samples are rows
     # - to calculate feature-clusters, transposition is needed so that features will be the rows
     if ( ! dim_features ) dm <- t(dm)
-    dm_en <- new.env()
-    dm <- prepare.data.matrix(
-            x.matrix = dm
-          , data.transformation = function(x) { x }
-          , en = dm_en
-          )
     # need to set.seed to get reproducible results from kmeans
     set.seed(4567)
     # do the k-means clustering
@@ -262,7 +253,7 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
              , km$betweenss
              , km$betweenss/km$totss
              )
-    list(clusters = km$cluster, scores = scores, logs = dm_en$log)
+    list(clusters = km$cluster, scores = scores)
   })
   return ( result_list )
 }

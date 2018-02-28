@@ -325,16 +325,16 @@ log_print("")
 if ( ! read_input_data(args_env, failure_action = read_input_failure_action) ) {
   result <- -1
 } else {
-  log_print("Input data was read successfully.")
+  log_print("Input data was read.")
   result <- w4mkmeans(env = args_env)
-  log_print("returned from call to w4mkmeans.")
+  log_print("Returned from call to w4mkmeans.")
 }
 
 if ( length(result) == 0 ) {
   log_print("no results were produced")
   # exit with status code non-zero to indicate error
   q(save = "no", status = 1, runLast = FALSE)
-} else if ( ! setequal(names(result),c("variableMetadata","sampleMetadata","scores","logs")) ) {
+} else if ( ! setequal(names(result),c("variableMetadata","sampleMetadata","scores")) ) {
   log_print(sprintf("unexpected result keys %s", names(result)))
   # exit with status code non-zero to indicate error
   q(save = "no", status = 1, runLast = FALSE)
@@ -355,19 +355,6 @@ if ( length(result) == 0 ) {
     }
   , error = function(e) {
       log_print(sprintf("failed to write output file for cluster scores - %s", format_error(e)))
-      # exit with status code non-zero to indicate error
-      q(save = "no", status = 1, runLast = FALSE)
-    }
-  )
-  tryCatch(
-    expr = {
-      logs <- result$logs
-      for ( i in 1:length(logs) ) {
-        log_cat("thread: ", logs[i])
-      }
-    }
-  , error = function(e) {
-      log_print(sprintf("failed to write log messages - %s", format_error(e)))
       # exit with status code non-zero to indicate error
       q(save = "no", status = 1, runLast = FALSE)
     }
