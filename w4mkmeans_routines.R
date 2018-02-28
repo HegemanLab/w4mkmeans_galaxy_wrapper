@@ -79,6 +79,30 @@ w4mkmeans <- function(env) {
   ksamples        <- positive_ints(env$ksamples , "ksamples")
   kfeatures       <- positive_ints(env$kfeatures, "kfeatures")
 
+  # prepare data matrix (normalize, eliminate zero-variance rows, etc.; no transformation)
+  dm_en <- new.env()
+  dm_en$log <- c()
+  preparation_result <- tryCatchFunc(function(){
+    dm <- prepare.data.matrix(
+            x.matrix = env$dataMatrix
+          , data.transformation = function(x) { x }
+          , en = dm_en
+          )
+    my_log <- dm_en$log
+    for ( i in 1:length(my_log) ) {
+      log_action(my_log[i])
+    }
+    dm
+  })
+  if ( !preparation_result$success ) {
+    postmortem <- paste("prepare.data.matrix failed:", preparation_result$msg)
+    log_action(postmortem)
+    stop(postmortem)
+  }
+
+  str(preparation_result)
+  env$preparedDataMatrix <- preparation_result$value
+
   myLapply <- parLapply
   cl <- NULL
   tryCatch(

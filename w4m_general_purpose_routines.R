@@ -147,7 +147,9 @@ prepare.data.matrix <- function(
 , en = new.env()
 ) {
   # log to environment
-  en$log <- c()
+  if ( !exists("log", envir = en) ) {
+    en$log <- c()
+  }
   enlog <- function(s) { en$log <- c(en$log, s); s }
   #enlog("foo")
 
