@@ -22,7 +22,7 @@
 #     slots "${GALAXY_SLOTS:-1}" \
 #     variableMetadata_out "$variableMetadata_out" \
 #     variable_metadata_path "$variableMetadata_in"
-# 
+#
 # <inputs>
 #   <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample, decimal: '.', missing: NA, mode: numerical, separator: tab" />
 #   <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns, separator: tab" />
@@ -66,11 +66,20 @@ r_path <- function(f) paste( tool_directory, f, sep = "/" )
 ## Computation - source general and module-specific routines
 ##----------------------------------------------------------
 
-log_print <- function(x, ...) { 
+log_print <- function(x, ...) {
   cat(
     format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
   , " "
   , c(x, ...)
+  , "\n"
+  , sep=""
+  , file=stderr()
+  )
+}
+
+log_cat <- function(x, ...) {
+  cat(
+    c(x, ...)
   , "\n"
   , sep=""
   , file=stderr()
@@ -85,7 +94,7 @@ if ( ! file.exists(w4m_general_purpose_routines_path) ) {
   log_print("cannot find file w4m_general_purpose_routines.R")
   q(save = "no", status = 1, runLast = TRUE)
 }
-# log_print("sourcing ",w4m_general_purpose_routines_path)
+log_print("sourcing ",w4m_general_purpose_routines_path)
 source(w4m_general_purpose_routines_path)
 if ( ! exists("prepare.data.matrix") ) {
   log_print("'prepare.data.matrix' was not read from file w4m_general_purpose_routines.R")
@@ -164,7 +173,7 @@ read_input_data <- function(env, failure_action = log_print) {
     expr = {
       # read in the sample metadata
       kind_string <- "sample metadata input"
-      smpl_metadata_input_env <- 
+      smpl_metadata_input_env <-
         read_data_frame(
                          file_path = env$sample_metadata_path
                        , kind_string = kind_string
@@ -178,7 +187,7 @@ read_input_data <- function(env, failure_action = log_print) {
 
       # read in the variable metadata
       kind_string <- "variable metadata input"
-      vrbl_metadata_input_env <- 
+      vrbl_metadata_input_env <-
         read_data_frame(
                          file_path = env$variable_metadata_path
                        , kind_string = kind_string
@@ -218,7 +227,7 @@ read_input_data <- function(env, failure_action = log_print) {
 }
 
 
-read_input_failure_action <- function(x, ...) { 
+read_input_failure_action <- function(x, ...) {
   log_print("Failure reading input for '", modNamC, "' Galaxy module call")
   log_print(x, ...)
 }
@@ -238,7 +247,7 @@ modNamC <- "w4mkmeans" ## module name
 
 # Set the handler for R error-handling
 options( show.error.messages = F
-       , error = function () { 
+       , error = function () {
                    log_print( "Fatal error in '", modNamC, "': ", geterrmessage() )
                    q( "no", 1, F )
                  }
@@ -283,7 +292,7 @@ scores_out                      <- as.character(argVc["scores_out"])
 args_env$data_matrix_path       <- as.character(argVc["data_matrix_path"])
 args_env$variable_metadata_path <- as.character(argVc["variable_metadata_path"])
 args_env$sample_metadata_path   <- as.character(argVc["sample_metadata_path"])
-  
+
 # other parameters
 
 # multi-string args - split csv: "1,2,3" -> c("1","2","3")
@@ -305,7 +314,7 @@ log_print("PARAMETERS (parsed):")
 for (member in ls(args_env)) {
   value <- get(member, args_env)
   value <- ifelse(length(value) == 1, value, sprintf("c(%s)", paste(value, collapse=", ")))
-  
+
   log_print(sprintf("  - %s: %s", member, ifelse( !is.function(value) , value, "function" )))
 }
 log_print("")
@@ -325,7 +334,7 @@ if ( length(result) == 0 ) {
   log_print("no results were produced")
   # exit with status code non-zero to indicate error
   q(save = "no", status = 1, runLast = FALSE)
-} else if ( ! setequal(names(result),c("variableMetadata","sampleMetadata","scores")) ) {
+} else if ( ! setequal(names(result),c("variableMetadata","sampleMetadata","scores","logs")) ) {
   log_print(sprintf("unexpected result keys %s", names(result)))
   # exit with status code non-zero to indicate error
   q(save = "no", status = 1, runLast = FALSE)
@@ -346,6 +355,19 @@ if ( length(result) == 0 ) {
     }
   , error = function(e) {
       log_print(sprintf("failed to write output file for cluster scores - %s", format_error(e)))
+      # exit with status code non-zero to indicate error
+      q(save = "no", status = 1, runLast = FALSE)
+    }
+  )
+  tryCatch(
+    expr = {
+      logs <- result$logs
+      for ( i in 1:length(logs) ) {
+        log_cat("thread: ", logs[i])
+      }
+    }
+  , error = function(e) {
+      log_print(sprintf("failed to write log messages - %s", format_error(e)))
       # exit with status code non-zero to indicate error
       q(save = "no", status = 1, runLast = FALSE)
     }

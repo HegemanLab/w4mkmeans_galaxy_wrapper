@@ -32,14 +32,14 @@
   ]]></command>
 
   <inputs>
-    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample, decimal: '.', missing: NA, mode: numerical, separator: tab" />
-    <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns, separator: tab" />
-    <param name="variableMetadata_in" label="Variable metadata file" type="data" format="tabular" help="variable x metadata columns, separator: tab" />
-    <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="c" help="[categorical_prefix] Some tools require non-numeric values to discern categorical data; e.g., enter 'k' here to prepend 'k' to cluster numbers in the output; default 'c'." />
+    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample; decimal point: '.'; missing: NA; mode: numerical; separator: tab" />
+    <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns; separator: tab" />
+    <param name="variableMetadata_in" label="Variable metadata file" type="data" format="tabular" help="variable x metadata columns; separator: tab" />
+    <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="c" help="String prepended to cluster numbers in output; default 'c'; leave blank for no prefix." />
     <param name="ksamples" label="K value(s) for samples" type="text" value = "0" help="[ksamples] Single K or comma-separated Ks for samples, or 0 for none." />
     <param name="kfeatures" label="K value(s) for features" type="text" value = "0" help="[kfeatures] Single K or comma-separated Ks for features (variables), or 0 for none." />
-    <param name="iter_max" label="Max number of iterations" type="text" value = "20" help="[iter_max] The maximum number of iterations allowed; default 20." />
-    <param name="nstart" label="Number of random sets" type="text" value = "20" help="[nstart] How many random sets should be chosen; default 20." />
+    <param name="iter_max" label="Maximum number of iterations" type="text" value = "20" help="[iter_max] The maximum number of iterations allowed; default 20." />
+    <param name="nstart" label="Number of random sets of clusters" type="text" value = "20" help="[nstart] How many random sets of clusters should be chosen initially; default 20." />
     <param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="[algorithm] K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd', see stats::kmeans reference for further info.">
       <option value="Forgy">Forgy</option>
       <option value="Hartigan-Wong" selected="True">Hartigan-Wong</option>
@@ -115,21 +115,21 @@ Calculate K-means for sample-clusters (or feature-clusters, or both) using W4M d
 Workflow Position
 -----------------
 
-  - Tool category: Statistical Analysis
-  - Upstream tool category: Preprocessing
-  - Downstream tool categories: Statistical Analysis
+- Tool category: Statistical Analysis
+- Upstream tool category: Preprocessing
+- Downstream tool categories: Statistical Analysis
 
 
 ----------
 Motivation
 ----------
 
-This tool clusters samples, features (variables), or both from the W4M dataMatrix and writes the results to new columns in sampleMetadata, variableMetadata, or both, respectively.
+This tool clusters samples, features (i.e., statistical variables), or both from the W4M dataMatrix and writes the results to new columns in sampleMetadata, variableMetadata, or both, respectively.
 
-  - If several, comma-separated K's are supplied, then one column is added for each K.
-  - This clustering is **not** hierarchical; each member of a cluster is not a member of any other cluster.
-  - For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
-  - For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
+- If several, comma-separated K's are supplied, then one column is added for each K.
+- This clustering is **not** hierarchical; each member of a cluster is not a member of any other cluster.
+- For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
+- For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
 
 
 -----------
@@ -153,35 +153,39 @@ Parameters
 
 **Data matrix** - input-file dataset
 
-  - XCMS variable x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
+- XCMS variable x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
 
 **Sample metadata** - input-file dataset
 
-  - XCMS sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
+- XCMS sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
 
 **Feature metadata** - input-file dataset
 
-  - XCMS variable x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+- XCMS variable x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
 
-**kfeatures** - K or K's for features (default = 0)
+**prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
 
-  - integer or comma-separated integers ; zero (the default) or less will result in no calculation.
+- some tools treat only non-numeric data as categorical; this prefix ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
 
-**ksamples** - K or K-range for samples (default = 0)
+**k-values for samples** - K or K-range for samples (default = 0)
 
-  - integer or comma-separated integers ; zero (the default) or less will result in no calculation.
+- integer or comma-separated positive integers ; zero (or less) will result in no calculation.
 
-**iter_max** - maximum_iterations (default = 10)
+**k-values for features** - K or K's for features (default = 0)
 
-  - maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+- integer or comma-separated positive integers ; zero (or less) will result in no calculation.
 
-**nstart** - how many random sets should be chosen (default = 1)
+**Maximumn number of iterations** - (default = 20)
 
-  - maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html).
+- maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html for further info).
 
-**categorical_prefix** - character(s) to add as prefix to category number (default = 'k')
+**Number of random sets** - how many random sets should be chosen to start (default = 20)
 
-  - some tools treat only non-numeric data as categorical; this prefix ('k' by default) ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
+- number of random sets of clusters to be chosen to start calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html for further info).
+
+**algorithm** - Algorithm for clustering" (default = Hartigan-Wong)
+
+- K-means clustering algorithm: 'Hartigan-Wong', 'Lloyd', or 'MacQueen'; 'Forgy' is a synonym for 'Lloyd' (see references for further info).
 
 ------------
 Output files
@@ -189,19 +193,19 @@ Output files
 
 **XCMS sampleMetadata** - (tabular separated values) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
 
-  - **k#** - cluster number for clustering samples with K = #
+- **k#** - cluster number for clustering samples with K = #
 
 **XCMS variableMetadata** - (tabular separated values) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
 
-  - **k#** - cluster number for clustering features with K = #
+- **k#** - cluster number for clustering features with K = #
 
 **scores** - (tabular separated values) file with one line for each K.
 
-  - **clusterOn** - what was clustered - either 'sample' or 'feature'
-  - **k** - the chosen K for clustering
-  - **totalSS** - total (*between-treatements* plus total of *within-treatements*) sum of squares
-  - **betweenSS** - *between-treatements* sum of squares
-  - **proportion** - betweenSS / totalSS
+- **clusterOn** - what was clustered - either 'sample' or 'feature'
+- **k** - the chosen K for clustering
+- **totalSS** - total (*between-treatements* plus total of *within-treatements*) sum of squares
+- **betweenSS** - *between-treatements* sum of squares
+- **proportion** - betweenSS / totalSS
 
 ---------------
 Working example

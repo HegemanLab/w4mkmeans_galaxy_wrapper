@@ -1,3 +1,42 @@
+##-----------------------------------------------
+## helper functions for error detection/reporting
+##-----------------------------------------------
+
+# log-printing to stderr
+log_print <- function(x, ...) {
+  cat(
+    format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+  , " "
+  , c(x, ...)
+  , "\n"
+  , sep=""
+  , file=stderr()
+  )
+}
+
+# tryCatchFunc produces a list
+#   func - a function that takes no arguments
+#   On success of func(), tryCatchFunc produces
+#     list(success TRUE, value = func(), msg = "")
+#   On failure of func(), tryCatchFunc produces
+#     list(success = FALSE, value = NA, msg = "the error message")
+tryCatchFunc <- function(func) {
+  # format error for logging
+  format_error <- function(e) {
+    paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
+  }
+  retval <- NULL
+  tryCatch(
+    expr = {
+      retval <- ( list( success = TRUE, value = func(), msg = "" ) )
+    }
+  , error = function(e) {
+      retval <<- list( success = FALSE, value = NA, msg = format_error(e) )
+    }
+  )
+  return (retval)
+}
+
 # prepare.data.matrix - Prepare x.datamatrix for multivariate statistical analaysis (MVA)
 #   - Motivation:
 #     - Selection:
@@ -7,7 +46,7 @@
 #         - If so, set the argument 'exclude.features' to a vector of feature names
 #     - Renaming samples:
 #       - You may want to rename several samples from your analysis:
-#         - If so, set the argument 'sample.rename.function' to a function accepting a vector 
+#         - If so, set the argument 'sample.rename.function' to a function accepting a vector
 #           of sample names and producing a vector of strings of equivalent length
 #     - MVA is confounded by missing values.
 #       - By default, this function imputes missing values as zero.
@@ -19,7 +58,7 @@
 #       - By default, this function performs an eigth-root transformation:
 #         - Any root-tranformation has the advantage of never being negative.
 #         - Calculation of the eight-root is four times faster in my hands than log10.
-#         - However, it has the disadvantage that calculation of fold-differences 
+#         - However, it has the disadvantage that calculation of fold-differences
 #           is not additive as with log-transformation.
 #           - Rather, you must divide the values and raise to the eighth power.
 #       - For a different transformation, set the 'data.transformation' argument
@@ -107,6 +146,11 @@ prepare.data.matrix <- function(
   }
 , en = new.env()
 ) {
+  # log to environment
+  en$log <- c()
+  enlog <- function(s) { en$log <- c(en$log, s); s }
+  #enlog("foo")
+
   # MatVar - Compute variance of rows or columns of a matrix
   # ref: http://stackoverflow.com/a/25100036
   # For row variance, dim == 1, for col variance, dim == 2
@@ -153,7 +197,7 @@ prepare.data.matrix <- function(
         row.names <- attr(nonzero.rows,"names")
         x <- x[ row.names, , drop = FALSE ]
       }
-      
+
       # exclude any columns with zero variance
       column.vars <- MatVar(x, dim = 2)
       nonzero.column.vars <- column.vars > 0
@@ -170,10 +214,13 @@ prepare.data.matrix <- function(
     stop("FATAL ERROR - prepare.data.matrix was called with null x.matrix")
   }
 
+  enlog("prepare.data.matrix - get matrix")
+
   en$xpre <- x <- x.matrix
 
   # exclude any samples as indicated
   if ( !is.null(exclude.features) ) {
+    enlog("prepare.data.matrix - exclude any samples as indicated")
     my.colnames <- colnames(x)
     my.col.diff <- setdiff(my.colnames, exclude.features)
     x <- x[ , my.col.diff , drop = FALSE ]
@@ -181,6 +228,7 @@ prepare.data.matrix <- function(
 
   # exclude any features as indicated
   if ( !is.null(exclude.samples) ) {
+    enlog("prepare.data.matrix - exclude any features as indicated")
     my.rownames <- rownames(x)
     my.row.diff <- setdiff(my.rownames, exclude.samples)
     x <- x[ my.row.diff, , drop = FALSE ]
@@ -188,20 +236,25 @@ prepare.data.matrix <- function(
 
   # rename rows if desired
   if ( !is.null(sample.rename.function) ) {
+    enlog("prepare.data.matrix - rename rows if desired")
     renamed <- sample.rename.function(x)
     rownames(x) <- renamed
   }
+
+  enlog("prepare.data.matrix - save redacted x.datamatrix to environment")
 
   # save redacted x.datamatrix to environment
   en$redacted.data.matrix <- x
 
   # impute values missing from the x.datamatrix
   if ( !is.null(data.imputation) ) {
+    enlog("prepare.data.matrix - impute values missing from the x.datamatrix")
     x <- data.imputation(x)
   }
 
   # perform transformation if desired
   if ( !is.null(data.transformation) ) {
+    enlog("prepare.data.matrix - perform transformation")
     x <- data.transformation(x)
   } else {
     x <- x
@@ -209,6 +262,7 @@ prepare.data.matrix <- function(
 
   # purge rows and columns that have zero variance
   if ( is.numeric(x) ) {
+    enlog("prepare.data.matrix - purge rows and columns that have zero variance")
     x <- nonzero.var(x)
   }
 
@@ -218,66 +272,4 @@ prepare.data.matrix <- function(
   return(x)
 }
 
-
-##-----------------------------------------------
-## helper functions for error detection/reporting
-##-----------------------------------------------
-
-# log-printing to stderr
-log_print <- function(x, ...) { 
-  cat(
-    format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
-  , " "
-  , c(x, ...)
-  , "\n"
-  , sep=""
-  , file=stderr()
-  )
-}
-
-# tryCatchFunc produces a list
-#   On success of expr(), tryCatchFunc produces
-#     list(success TRUE, value = expr(), msg = "")
-#   On failure of expr(), tryCatchFunc produces
-#     list(success = FALSE, value = NA, msg = "the error message")
-tryCatchFunc <- function(expr) {
-  # format error for logging
-  format_error <- function(e) {
-    paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
-  }
-  my_expr <- expr
-  retval <- NULL
-  tryCatch(
-    expr = {
-      retval <- ( list( success = TRUE, value = my_expr(), msg = "" ) )
-    }
-  , error = function(e) {
-      retval <<- list( success = FALSE, value = NA, msg = format_error(e) )
-    }
-  )
-  return (retval)
-}
-
-# tryCatchProc produces a list
-#   On success of expr(), tryCatchProc produces
-#     list(success TRUE, msg = "")
-#   On failure of expr(), tryCatchProc produces
-#     list(success = FALSE, msg = "the error message")
-tryCatchProc <- function(expr) {
-  # format error for logging
-  format_error <- function(e) {
-    paste(c("Error { message:", e$message, ", call:", e$call, "}"), collapse = " ")
-  }
-  retval <- NULL
-  tryCatch(
-    expr = {
-      expr()
-      retval <- ( list( success = TRUE, msg = "" ) )
-    }
-  , error = function(e) {
-      retval <<- list( success = FALSE, msg = format_error(e) )
-    }
-  )
-  return (retval)
-}
-
+# vim: sw=2 ts=2 et :

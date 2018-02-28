@@ -64,35 +64,47 @@ This tool clusters samples, features \(variables\), or both from the W4M dataMat
 
 **Data matrix** - input-file dataset
 
-> * XCMS variable x sample 'dataMatrix' \(tabular separated values\) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively \(see below\)
+> XCMS variable x sample 'dataMatrix' \(tabular separated values\) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively \(see below\)
 
 **Sample metadata** - input-file dataset
 
-> * XCMS sample x metadata 'sampleMetadata' \(tabular separated values\) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
+> XCMS sample x metadata 'sampleMetadata' \(tabular separated values\) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
 
 **Feature metadata** - input-file dataset
 
-> * XCMS variable x metadata 'variableMetadata' \(tabular separated values\) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+> XCMS variable x metadata 'variableMetadata' \(tabular separated values\) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
 
-**kfeatures** - K or K's for features \(default = 0\)
+**prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
 
-> * integer or comma-separated integers ; zero \(the default\) or less will result in no calculation.
+> Some tools require non-numeric values to discern categorical data; e.g., enter 'c' here to prepend 'c' to cluster numbers in the output; default 'c'.
 
 **ksamples** - K or K-range for samples \(default = 0\)
 
-> * integer or comma-separated integers ; zero \(the default\) or less will result in no calculation.
+> integer or comma-separated integers ; zero \(the default\) or less will result in no calculation.
 
-**iter\_max** - maximum\_iterations \(default = 10\)
+**kfeatures** - K or K's for features \(default = 0\)
 
-> * maximum number of iterations per calculation \(see
+> integer or comma-separated integers ; zero \(the default\) or less will result in no calculation.
+
+**iter\_max** - maximum\_iterations \(default = 20\)
+
+> maximum number of iterations per calculation \(see
 > [`stats::kmeans` documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html)
 > \).
 
-**nstart** - how many random sets should be chosen \(default = 1\)
+**nstart** - how many random sets should be chosen \(default = 20\)
 
-> * maximum number of iterations per calculation \(see
+> number of random sets of centers to start calculation \(see
 > [`stats::kmeans` documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html)
 > \).
+
+**algorithm** - algorithm for clustering \(default = 20\)
+
+> K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd' \(see
+> [`stats::kmeans` documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html)
+> \).
+
+
 
 ## Output files
 
@@ -126,6 +138,9 @@ This tool clusters samples, features \(variables\), or both from the W4M dataMat
 
 | Input Parameter | Value |
 | :--- | :--- |
+categorical_prefix - character(s) to add as prefix to category number (default = 'k')
+
+some tools treat only non-numeric data as categorical; this prefix ('k' by default) ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
 | ksamples | 3,4 |
 | kfeatures | 5,6,7 |
 | iter\_max | 10 |
@@ -134,6 +149,13 @@ This tool clusters samples, features \(variables\), or both from the W4M dataMat
 
 ## NEWS
 
+August 2017, Version 0.98.4 - Maintenance release
+
+  - Update bioconda r-base dependency to v3.4.1
+  - Add dependency on conda packages libssh2 and krb5 needed by makePSOCKcluster on some platforms
+  - Make tool fail when no results are produced
+  - Changed parameter defaults for iterations and random sets to improve convergence of results.
+ 
 August 2017, Version 0.98.3 - Feature-tuning release
  
   - Add (optional) prefix to category numbers for downstream tools that treat only non-numeric data as categorical.
