@@ -4,6 +4,8 @@
   <requirements>
     <requirement type="package" version="3.4.1">r-base</requirement>
     <requirement type="package" version="1.1_4">r-batch</requirement>
+    <requirement type="package" version="1.8.0">libssh2</requirement>
+    <requirement type="package" version="1.13.2">krb5</requirement>
   </requirements>
 
   <stdio>

@@ -59,7 +59,7 @@ w4mkmeans <- function(env) {
     stop("w4mkmeans: contract has been broken")
   } 
   # extract parameters from 'env'
-  failure_action  <- env$log_print
+  log_action  <- env$log_print
   scores          <- c( "clusterOn\tk\ttotalSS\tbetweenSS\tproportion" )
   sampleMetadata  <- env$sampleMetadata
   featureMetadata <- env$variableMetadata
@@ -70,7 +70,7 @@ w4mkmeans <- function(env) {
     i <- i[i > 0]         # eliminate non-positive integers
     i <- unique(sort(i))  # eliminate redundancy and disorder
     if (length(a)!=length(i)) {
-      failure_action("Some values for '", what, "' were skipped where not unique, not positive, or not convertible to an integer.")
+      log_action("Some values for '", what, "' were skipped where not unique, not positive, or not convertible to an integer.")
     }
     return (i)            # return results, if any
   }
@@ -84,12 +84,13 @@ w4mkmeans <- function(env) {
       cl <- makePSOCKcluster(names = slots)
     }
     , error = function(e) {
+      log_action(sprintf("w4kmeans: falling back to serial evaluation because makePSOCKcluster(names = %d) threw an exception", slots))
       # mimic parLapply, but without parallelization (as a last resort)
       myLapply <<- function(cl, ...) lapply(...)
     }
   )
   if ( identical(myLapply, parLapply) ) {
-    failure_action(sprintf("w4mkmeans: using parallel evaluation with %d slots", slots))
+    log_action(sprintf("w4mkmeans: using parallel evaluation with %d slots", slots))
     # from ?makePSOCKcluster: "It is good practice to shut down the workers by calling stopCluster."
     clusterExport(
       cl = cl
@@ -102,12 +103,12 @@ w4mkmeans <- function(env) {
     final <- function(cl) {
       # from ?makePSOCKcluster: "It is good practice to shut down the workers by calling stopCluster."
       if ( !is.null(cl) ) {
-        failure_action("w4mkmeans: stopping cluster used for parallel evaluation")
+        log_action("w4mkmeans: stopping cluster used for parallel evaluation")
         stopCluster(cl)
       }
     }
   } else {
-    failure_action("w4mkmeans: using sequential evaluation (1 slot)")
+    log_action("w4mkmeans: using sequential evaluation (one slot)")
     final <- function(cl) { }
   }
 
