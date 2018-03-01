@@ -2,15 +2,20 @@
 ## helper functions for error detection/reporting
 ##-----------------------------------------------
 
+# ISO 8601 date ref: https://en.wikipedia.org/wiki/ISO_8601
+iso_date <- function() {
+  format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+}
+
 # log-printing to stderr
 log_print <- function(x, ...) {
   cat(
-    format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
+    sep=""
+  , file=stderr()
+  , iso_date()
   , " "
   , c(x, ...)
   , "\n"
-  , sep=""
-  , file=stderr()
   )
 }
 
@@ -22,7 +27,7 @@ format_error <- function(e) {
 # tryCatchFunc produces a list
 #   func - a function that takes no arguments
 #   On success of func(), tryCatchFunc produces
-#     list(success TRUE, value = func(), msg = "")
+#     list(success = TRUE, value = func(), msg = "")
 #   On failure of func(), tryCatchFunc produces
 #     list(success = FALSE, value = NA, msg = "the error message")
 tryCatchFunc <- function(func) {

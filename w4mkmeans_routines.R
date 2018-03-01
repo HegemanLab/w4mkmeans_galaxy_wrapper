@@ -18,8 +18,8 @@ w4mkmeans_usage <- function() {
      "    optional - environment may comprise:",
      "      kfeatures          - an array of integers, the k's to apply for clustering by feature (default, empty array)",
      "      ksamples           - an array of integers, the k's to apply for clustering by sample (default, empty array)",
-     "      iter.max           - the maximum number of iterations when calculating a cluster (default = 10)",
-     "      nstart             - how many random sets of centers should be chosen (default = 1)",
+     "      iter_max           - the maximum number of iterations when calculating a cluster (default = 20)",
+     "      nstart             - how many random sets of centers should be chosen (default = 20)",
      "      algorithm          - string from c('Hartigan-Wong', 'Lloyd', 'Forgy', 'MacQueen') (default = Hartigan-Wong)",
      "      categorical_prefix - string from c('Hartigan-Wong', 'Lloyd', 'Forgy', 'MacQueen') (default = Hartigan-Wong)",
      "      ",
@@ -40,10 +40,10 @@ w4mkmeans <- function(env) {
   # extract parameters from 'env'
   log_action  <- env$log_print
   # supply default arguments
-  if ( ! exists("iter.max"          , env) ) env$iter.max  <- 10
-  if ( ! exists("nstart"            , env) ) env$nstart    <- 1
+  if ( ! exists("iter_max"          , env) ) env$iter_max  <- 20
+  if ( ! exists("nstart"            , env) ) env$nstart    <- 20
   if ( ! exists("algorithm"         , env) ) env$algorithm <- 'Hartigan-Wong'
-  if ( ! exists("categorical_prefix", env) ) env$categorical_prefix <- 'k'
+  if ( ! exists("categorical_prefix", env) ) env$categorical_prefix <- 'c'
   if ( ! exists("ksamples"          , env) ) env$ksamples  <- c()
   if ( ! exists("kfeatures"         , env) ) env$kfeatures <- c()
   # check mandatory arguments
@@ -79,6 +79,7 @@ w4mkmeans <- function(env) {
   ksamples        <- positive_ints(env$ksamples , "ksamples")
   kfeatures       <- positive_ints(env$kfeatures, "kfeatures")
 
+  log_action("w4mkmeans: preparing data matrix")
   # prepare data matrix (normalize, eliminate zero-variance rows, etc.; no transformation)
   dm_en <- new.env()
   dm_en$log <- c()
@@ -102,11 +103,19 @@ w4mkmeans <- function(env) {
 
   env$preparedDataMatrix <- preparation_result$value
 
+  log_action("w4mkmeans: determining evaluation mode")
+
   myLapply <- parLapply
   cl <- NULL
   tryCatch(
     expr = {
-      cl <- makePSOCKcluster(names = slots)
+      outfile <- ""
+      # outfile: Where to direct the stdout and stderr connection output from the workers.
+      #   - "" indicates no redirection (which may only be useful for workers on the local machine).
+      #   - Defaults to ‘/dev/null’ (‘nul:’ on Windows).
+      #   - The other possibility is a file path on the worker's host.
+      #     - Files will be opened in append mode, as all workers log to the same file.
+      cl <- makePSOCKcluster( names = slots, outfile = outfile )
     }
     , error = function(e) {
       log_action(sprintf("w4kmeans: falling back to serial evaluation because makePSOCKcluster(names = %d) threw an exception", slots))
@@ -121,10 +130,10 @@ w4mkmeans <- function(env) {
     clusterExport(
       cl = cl
     , varlist = c(
-        "tryCatchFunc"
-      , "format_error"
-      , "calc_kmeans_one_dimension_one_k"
-      , "prepare.data.matrix"
+        "tryCatchFunc"                     # required by calc_kmeans_one_dimension_one_k
+      , "format_error"                     # required by tryCatchFunc when errors are caught
+      , "iso_date"                         # required by log_print
+      , "log_print"                        # required by calc_kmeans_one_dimension_one_k
       )
     )
     final <- function(cl) {
@@ -191,7 +200,9 @@ w4mkmeans <- function(env) {
         )
       )
     }
-  , finally = final(cl)
+  , finally = {
+      final(cl)
+    }
   )
 }
 
@@ -216,6 +227,7 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
   if ( ! exists("log_print", env) || ! is.function(env$log_print) ) {
     stop("calc_kmeans_one_dimension_one_k - argument 'env' - environment does not include log_print or it is not a function")
   }
+  log_action  <- env$log_print
   # abort if k is not as expected
   if ( ! is.numeric(k) ) {
     stop(sprintf("calc_kmeans_one_dimension_one_k - expected numeric argument 'k' but type is %s", typeof(k)))
@@ -227,24 +239,48 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
     stop("calc_kmeans_one_dimension_one_k - argument 'dimension' is neither 'features' nor 'samples'")
   }
   dm           <- env$preparedDataMatrix
-  iter.max     <- env$iter.max
+  iter_max     <- env$iter_max
   nstart       <- env$nstart
   algorithm    <- env$algorithm
   dim_features <- dimension == "features"
+
   # tryCatchFunc produces a list
-  #   On success of expr(), tryCatchFunc produces
-  #     list(success TRUE, value = expr(), msg = "")
-  #   On failure of expr(), tryCatchFunc produces
+  #   On success of func(), tryCatchFunc produces
+  #     list(success = TRUE, value = func(), msg = "")
+  #   On failure of func(), tryCatchFunc produces
   #     list(success = FALSE, value = NA, msg = "the error message")
   result_list <- tryCatchFunc( func = function() {
     # kmeans clusters the rows; features are the columns of args_env$dataMatrix; samples, the rows
     # - to calculate sample-clusters, no transposition is needed because samples are rows
     # - to calculate feature-clusters, transposition is needed so that features will be the rows
-    if ( ! dim_features ) dm <- t(dm)
+    if ( ! dim_features ) {
+      dm <- t(dm)
+    }
+
     # need to set.seed to get reproducible results from kmeans
     set.seed(4567)
+
     # do the k-means clustering
-    km <- kmeans( x = dm, centers = k, iter.max, nstart = nstart, algorithm = algorithm )
+    withCallingHandlers(
+      {
+        km <<- kmeans( x = dm, centers = k, iter.max = iter_max, nstart = nstart, algorithm = algorithm )
+      }
+    , warning = function(w) {
+        lw <- list(w)
+        smplwrn <- as.character(w[[1]])
+        log_print(
+            sprintf( "Warning for %s: center = %d, nstart = %d, iter_max = %d: %s"
+          , if (dim_features) "features" else "samples"
+          , k
+          , nstart
+          , iter_max
+          , smplwrn
+          )
+        )
+      }
+    )
+
+    # collect the scores
     scores <-
       sprintf("%s\t%d\t%0.5e\t%0.5e\t%0.5f"
              , dimension
@@ -253,8 +289,15 @@ calc_kmeans_one_dimension_one_k <- function(k, env, dimension = "samples") {
              , km$betweenss
              , km$betweenss/km$totss
              )
+
+    # return list of results
     list(clusters = km$cluster, scores = scores)
   })
+
+  # return either
+  #     list(success = TRUE, value = func(), msg = "")
+  # or
+  #     list(success = FALSE, value = NA, msg = "the error message")
   return ( result_list )
 }
 

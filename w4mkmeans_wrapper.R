@@ -30,8 +30,8 @@
 #   <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="k" help="Some tools require non-numeric values to discern categorical; e.g., enter 'k' here to prepend 'k' to cluster numbers in the output; default 'k'." />
 #   <param name="kfeatures" label="K value(s) for features" type="text" value="0" help="Single or min,max value(s) for K for features (variables), or 0 for none." />
 #   <param name="ksamples" label="K value(s) for samples" type="text" value="0" help="Single or min,max value(s) for K for samples, or 0 for none." />
-#   <param name="iter_max" label="Max number of iterations" type="text" value="10" help="The maximum number of iterations allowed; default 10." />
-#   <param name="nstart" label="Number of random sets" type="text" value="1" help="How many random sets should be chosen; default 1." />
+#   <param name="iter_max" label="Max number of iterations" type="text" value="20" help="The maximum number of iterations allowed; default 20." />
+#   <param name="nstart" label="Number of random sets" type="text" value="20" help="How many random sets should be chosen; default 20." />
 # 	<param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd', see stats::kmeans reference for further info and references.">
 # 	  <option value="Hartigan-Wong" selected="TRUE">Hartigan-Wong</option>
 # 	  <option value="Lloyd">Lloyd</option>
@@ -320,12 +320,13 @@ for (member in ls(args_env)) {
 log_print("")
 
 ##---------------------------------------------------------
-## Computation - attempt to read input data
+## Computation - attempt to read input data and process
 ##---------------------------------------------------------
 if ( ! read_input_data(args_env, failure_action = read_input_failure_action) ) {
   result <- -1
 } else {
   log_print("Input data was read.")
+  # attempt to process the data
   result <- w4mkmeans(env = args_env)
   log_print("Returned from call to w4mkmeans.")
 }
@@ -364,7 +365,6 @@ if ( length(result) == 0 ) {
 ##--------
 ## Closing
 ##--------
-
 
 if (!file.exists(sampleMetadata_out)) {
   log_print(sprintf("ERROR %s::w4m_kmeans_wrapper - file '%s' was not created", modNamC, sampleMetadata_out))
