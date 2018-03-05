@@ -138,6 +138,7 @@ March 2018, Version 0.98.4 - Maintenance release
   - Add dependency on conda packages libssh2 and krb5 needed by makePSOCKcluster on some platforms
   - Make tool fail when no results are produced
   - Changed parameter defaults for iterations and random sets to improve convergence of results.
+  - Published to the Galaxy toolshed [https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/c415b7dc6f37](https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/c415b7dc6f37)
  
 August 2017, Version 0.98.3 - Feature-tuning release
  
