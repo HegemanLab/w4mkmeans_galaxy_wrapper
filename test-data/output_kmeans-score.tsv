@@ -1,0 +1,6 @@
+clusterOn	k	totalSS	betweenSS	proportion
+samples	3	2.02789e+16	1.77403e+16	0.87482
+samples	4	2.02789e+16	1.86088e+16	0.91765
+features	5	2.50816e+16	2.39182e+16	0.95362
+features	6	2.50816e+16	2.40079e+16	0.95719
+features	7	2.50816e+16	2.45714e+16	0.97966

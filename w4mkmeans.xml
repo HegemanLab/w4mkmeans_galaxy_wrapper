@@ -1,5 +1,5 @@
 ﻿<tool id="w4mkmeans" name="Kmeans for W4m" version="0.98.4">
-  <description>Calculate K-means for W4M dataMatrix features or samples</description>
+  <description>Calculate K-means for W4m dataMatrix features or samples</description>
 
   <requirements>
     <requirement type="package" version="3.4.1">r-base</requirement>
@@ -32,15 +32,15 @@
   ]]></command>
 
   <inputs>
-    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable (feature) x sample; decimal point: '.'; missing: NA; mode: numerical; separator: tab" />
-    <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns; separator: tab" />
-    <param name="variableMetadata_in" label="Variable (feature) metadata file" type="data" format="tabular" help="variable (feature) x metadata columns; separator: tab" />
-    <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="c" help="String prepended to cluster numbers in output; default 'c'; leave blank for no prefix." />
+    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="Feature (variable) x sample; decimal point: '.'; missing: NA; mode: numerical; separator: tab" />
+    <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="Sample x metadata columns; separator: tab" />
+    <param name="variableMetadata_in" label="Variable (feature) metadata file" type="data" format="tabular" help="Feature (variable) x metadata columns; separator: tab" />
+    <param name="categoricalPrefix" label="Prefix for cluster names " type="text" value="c" help="String prepended to cluster numbers in output; default 'c'; leave blank for no prefix." />
     <param name="ksamples" label="K value(s) for samples" type="text" value = "0" help="[ksamples] Single K or comma-separated Ks for samples, or 0 for none." />
     <param name="kfeatures" label="K value(s) for features" type="text" value = "0" help="[kfeatures] Single K or comma-separated Ks for features (variables), or 0 for none." />
     <param name="iter_max" label="Maximum number of iterations" type="text" value = "20" help="[iter_max] The maximum number of iterations allowed; default 20." />
     <param name="nstart" label="Number of random sets of clusters" type="text" value = "20" help="[nstart] How many random sets of clusters should be chosen initially; default 20." />
-    <param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="[algorithm] K-means clustering algorithm, default 'Hartigan-Wong'; alternatives 'Lloyd', 'MacQueen'; 'Forgy' is a synonym for 'Lloyd', see stats::kmeans reference for further info.">
+    <param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="[algorithm] K-means clustering algorithm, default 'Hartigan-Wong'; &lt;br /&gt;alternatives 'Lloyd', 'MacQueen'; 'Forgy' is same as 'Lloyd', see references.">
       <option value="Forgy">Forgy</option>
       <option value="Hartigan-Wong" selected="True">Hartigan-Wong</option>
       <option value="Lloyd">Lloyd</option>
@@ -81,7 +81,7 @@
     <![CDATA[
 
 ===========================
-K-means for W4M data matrix
+K-means for W4m data matrix
 ===========================
 
 **Author** - Arthur Eschenlauer (University of Minnesota, esch0041@umn.edu)
@@ -96,7 +96,14 @@ K-means for W4M data matrix
 Description
 -----------
 
-Calculate K-means for sample-clusters (or feature-clusters, or both) using W4M dataMatrix (i.e., XCMS-preprocessed data files) as input.
+This tool calculate K-means clusters for samples, features, or both using W4m dataMatrix (i.e., XCMS-preprocessed data files) as input and writes the results to new columns in sampleMetadata, variableMetadata, or both.
+
+- If several, comma-separated K's are supplied, then one column is added for each K.
+- For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
+- For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
+- Clustering is mutually exclusive, **not** hierarchical.
+
+    - Hierarchical clustering is available through the W4m Heat Map tool, https://github.com/workflow4metabolomics/heatmap
 
 -----------------
 Workflow Position
@@ -105,17 +112,6 @@ Workflow Position
 - Tool category: Statistical Analysis
 - Upstream tool category: Preprocessing
 - Downstream tool categories: Statistical Analysis
-
-----------
-Motivation
-----------
-
-This tool clusters samples, features (i.e., statistical variables), or both from the W4M dataMatrix and writes the results to new columns in sampleMetadata, variableMetadata, or both, respectively.
-
-- If several, comma-separated K's are supplied, then one column is added for each K.
-- This clustering is **not** hierarchical; each member of a cluster is not a member of any other cluster.
-- For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
-- For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
 
 -----------
 Input files
@@ -138,37 +134,37 @@ Parameters
 
 **Data matrix** - input-file dataset
 
-- XCMS variable (i.e. feature) x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
+- W4m variable (i.e. feature) x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
 
 **Sample metadata** - input-file dataset
 
-- XCMS sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
+- W4m sample x metadata 'sampleMetadata' (tabular separated values) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
 
 **Feature metadata** - input-file dataset
 
-- XCMS variable (i.e. feature) x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+- W4m variable (i.e. feature) x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
 
-**prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
+**Prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
 
-- some tools treat only non-numeric data as categorical; this prefix ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
+- Some tools treat only non-numeric data as categorical; this prefix ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
 
-**k-values for samples** - K or K-range for samples (default = 0)
+**K-values for samples** - K or K-range for samples (default = 0)
 
-- integer or comma-separated positive integers ; zero (or less) will result in no calculation.
+- Integer or comma-separated positive integers ; zero (or less) will result in no calculation.
 
-**k-values for features** - K or K's for features (default = 0)
+**K-values for features** - K or K's for features (default = 0)
 
-- integer or comma-separated positive integers ; zero (or less) will result in no calculation.
+- Integer or comma-separated positive integers ; zero (or less) will result in no calculation.
 
 **Maximumn number of iterations** - (default = 20)
 
-- maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html for further info).
+- Maximum number of iterations per calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html for further info).
 
 **Number of random sets** - how many random sets should be chosen to start (default = 20)
 
-- number of random sets of clusters to be chosen to start calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html for further info).
+- Number of random sets of clusters to be chosen to start calculation (see https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html for further info).
 
-**algorithm** - Algorithm for clustering" (default = Hartigan-Wong)
+**Algorithm** - Algorithm for clustering" (default = Hartigan-Wong)
 
 - K-means clustering algorithm: 'Hartigan-Wong', 'Lloyd', or 'MacQueen'; 'Forgy' is a synonym for 'Lloyd' (see references for further info).
 
@@ -176,11 +172,11 @@ Parameters
 Output files
 ------------
 
-**XCMS sampleMetadata** - (tabular separated values) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
+**Sample Metadata** - (tabular separated values) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
 
 - **k#** - cluster number for clustering samples with K = #
 
-**XCMS variableMetadata** - (tabular separated values) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
+**Variable Metadata** - (tabular separated values) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
 
 - **k#** - cluster number for clustering features with K = #
 
@@ -213,6 +209,8 @@ Working example
 +-----------------+---------------+
 | Input Parameter | Value         |
 +=================+===============+
+| prefix          | c             |
++-----------------+---------------+
 | ksamples        | 3,4           |
 +-----------------+---------------+
 | kfeatures       | 5,6,7         |
@@ -228,7 +226,7 @@ Working example
 NEWS
 ----
 
-- February 2018, Version 0.98.4 - Renamed output datasets to append 'kmeans-...'.
+- February 2018, Version 0.98.4 - Renamed output datasets to append '``.kmeans-smpl``', '``.kmeans-vrbl``', or '``.kmeans-score``'; refactored multi-threading.
 - August 2017, Version 0.98.3 - Add (optional) prefix to category numbers for downstream tools that treat only non-numeric data as categorical.
 - August 2017, Version 0.98.1 - First release
 
@@ -268,9 +266,9 @@ Citations
   year = 1965
 }
     ]]></citation>
-    <!-- W4M 3.0 - Guitton et al. 2017-->
+    <!-- W4m 3.0 - Guitton et al. 2017-->
     <citation type="doi">10.1016/j.biocel.2017.07.002</citation>
-    <!-- W4M 2.5 - Giacomini et al. 2014 -->
+    <!-- W4m 2.5 - Giacomini et al. 2014 -->
     <citation type="doi">10.1093/bioinformatics/btu813</citation>
     <!-- Hartigan and Wong algorithm -->
     <citation type="doi">10.2307/2346830</citation>
