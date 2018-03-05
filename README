@@ -1,2 +1,5 @@
-# w4mkmeans_galaxy_wrapper
-Planemo-based galaxy-tool-wrapper to wrap the stats::kmeans R package for the W4M dataMatrix
+# Kmeans for W4m
+
+Kmeans for W4m is Galaxy tool-wrapper to wrap the R stats::kmeans package 
+for use with the Workflow4Metabolomics flavor of Galaxy. 
+This tool is built with Planemo.
