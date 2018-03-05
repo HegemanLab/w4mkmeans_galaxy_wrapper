@@ -1,41 +1,30 @@
-# w4mkmeans
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1171926.svg)](https://doi.org/10.5281/zenodo.1171926)
 
-w4mkmeans is a planemo-based galaxy-tool-wrapper to wrap the `stats::kmeans` R package for clustering the W4M dataMatrix.
+[Repository 'w4mkmeans' in Galaxy Toolshed](https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/02cafb660b72)
 
-## Roles of files here:
-- `run_test.sh` - set up and run `planemo test`
-- `run_serve.sh` - set up and run `planemo serve`
-- `run_wrapper.sh` - invoke `w4mkmeans_wrapper.R`
-- `w4mkmeans.xml` - presentation layer
-- `w4mkmeans_wrapper.R` - Galaxy-specific code
-- `w4mkmeans_routines.R` - Galaxy-independent code to invoke `stats::kmeans`
-- `w4m_general_purpose_routines.R` - some reusable utilities specific to the W4M / XCMS data formats
+# Kmeans for W4m
 
-# Tool usage details
+## A Galaxy tool to calculate K-means for W4m (Workflow4Metabolomics) dataMatrix features or samples
 
-**Author** - Arthur Eschenlauer \(University of Minnesota, [esch0041@umn.edu](mailto:esch0041@umn.edu)\)
+*Kmeans for W4m* is [Galaxy tool-wrapper](https://docs.galaxyproject.org/en/latest/dev/schema.htm) to wrap the
+R [`stats::kmeans`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html) package for use with the
+[Workflow4Metabolomics](http://workflow4metabolomics.org/) flavor of
+[Galaxy](https://galaxyproject.org/).
+This tool is built with [planemo](http://planemo.readthedocs.io/en/latest/).
 
----
+### Author
 
-**Source** - The source code for the w4mkmeans tool is available \(from the Hegeman lab github repository\) at [https://github.com/HegemanLab/w4mkmeans\_galaxy\_wrapper](https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper)
+Arthur Eschenlauer (University of Minnesota, esch0041@umn.edu)
 
-**R code used** - The R code invoked by this wrapper is the R [`stats::kmeans`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html) package
+### Tool updates
 
----
-
-**Tool updates**
-
-See the **NEWS** section at the bottom of this page
-
----
-
-# K-means for W4M data matrix
+See the **NEWS** section below
 
 ## Description
 
 Calculate K-means for sample-clusters \(or feature-clusters, or both\) using W4M dataMatrix \(i.e., XCMS-preprocessed data files\) as input.
 
-_Please note that XCMS refers to features as 'variables'. This documentation generally refers to them as features._
+*Please note that XCMS refers to features as 'variables'. This documentation generally refers to them as features.*
 
 ## Workflow Position
 
@@ -45,12 +34,12 @@ _Please note that XCMS refers to features as 'variables'. This documentation gen
 
 ## Motivation
 
-This tool clusters samples, features \(variables\), or both from the W4M dataMatrix and writes the results to new columns in sampleMetadata, variableMetadata, or both, respectively.
+Using the intensities in the dataMatrix, this tool clusters samples, features \(variables\), or both from the W4M dataMatrix and writes the results to new columns in sampleMetadata, variableMetadata, or both, respectively.
 
-> * If several, comma-separated K's are supplied, then one column is added for each K.
-> * This clustering is **not** hierarchical; each member of a cluster is not a member of any other cluster.
-> * For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
-> * For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
+- If several, comma-separated K's are supplied, then one column is added for each K.
+- This clustering is **not** hierarchical; each member of a cluster by definition is not a member of any other cluster.
+- For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
+- For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
 
 ## Input files
 
@@ -138,18 +127,16 @@ This tool clusters samples, features \(variables\), or both from the W4M dataMat
 
 | Input Parameter | Value |
 | :--- | :--- |
-categorical_prefix - character(s) to add as prefix to category number (default = 'k')
-
-some tools treat only non-numeric data as categorical; this prefix ('k' by default) ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
+| prefix for cluster names | c |
 | ksamples | 3,4 |
 | kfeatures | 5,6,7 |
-| iter\_max | 10 |
-| nstart | 1 |
+| iter\_max | 20 |
+| nstart | 20 |
 | algorithm | Hartigan-Wong |
 
 ## NEWS
 
-August 2017, Version 0.98.4 - Maintenance release
+March 2018, Version 0.98.4 - Maintenance release
 
   - Update bioconda r-base dependency to v3.4.1
   - Add dependency on conda packages libssh2 and krb5 needed by makePSOCKcluster on some platforms
