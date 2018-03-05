@@ -22,24 +22,20 @@ See the **NEWS** section below
 
 ## Description
 
-Calculate K-means for sample-clusters \(or feature-clusters, or both\) using W4M dataMatrix \(i.e., XCMS-preprocessed data files\) as input.
-
-*Please note that XCMS refers to features as 'variables'. This documentation generally refers to them as features.*
-
-## Workflow Position
-
-| Tool category | Upstream tool category | Downstream tool categories |
-| :--- | :--- | :--- |
-| Statistical Analysis | Preprocessing | Statistical Analysis |
-
-## Motivation
-
 Using the intensities in the dataMatrix, this tool clusters samples, features \(variables\), or both from the W4M dataMatrix and writes the results to new columns in sampleMetadata, variableMetadata, or both, respectively.
 
 - If several, comma-separated K's are supplied, then one column is added for each K.
 - This clustering is **not** hierarchical; each member of a cluster by definition is not a member of any other cluster.
 - For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
 - For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
+
+*Please note that some places in the W4m documentation refer to features (ion-intensity vs. retention-time and mass-to-charge ratio) as 'variables', since they are the variables used in statistical analysis.*
+
+## Workflow Position
+
+| Tool category | Upstream tool category | Downstream tool categories |
+| :--- | :--- | :--- |
+| Statistical Analysis | Preprocessing | Statistical Analysis |
 
 ## Input files
 
@@ -53,15 +49,15 @@ Using the intensities in the dataMatrix, this tool clusters samples, features \(
 
 **Data matrix** - input-file dataset
 
-> XCMS variable x sample 'dataMatrix' \(tabular separated values\) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively \(see below\)
+> W4m variable x sample 'dataMatrix' \(tabular separated values\) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively \(see below\)
 
 **Sample metadata** - input-file dataset
 
-> XCMS sample x metadata 'sampleMetadata' \(tabular separated values\) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
+> W4m sample x metadata 'sampleMetadata' \(tabular separated values\) file of the numeric and/or character sample metadata, with . as decimal and NA for missing values
 
 **Feature metadata** - input-file dataset
 
-> XCMS variable x metadata 'variableMetadata' \(tabular separated values\) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+> W4m variable x metadata 'variableMetadata' \(tabular separated values\) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
 
 **prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
 
@@ -97,11 +93,11 @@ Using the intensities in the dataMatrix, this tool clusters samples, features \(
 
 ## Output files
 
-**XCMS sampleMetadata** - \(tabular separated values\) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
+**W4m sampleMetadata** - \(tabular separated values\) file identical to the Sample metadata file given as an input argument, excepting one column added for each K
 
 > * **k\#** - cluster number for clustering samples with K = \#
 
-**XCMS variableMetadata** - \(tabular separated values\) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
+**W4m variableMetadata** - \(tabular separated values\) file identical to the Feature metadata file given as an input argument, excepting one column added for each K
 
 > * **k\#** - cluster number for clustering features with K = \#
 
