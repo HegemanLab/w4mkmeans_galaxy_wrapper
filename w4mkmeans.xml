@@ -40,7 +40,7 @@
     <param name="kfeatures" label="K value(s) for features" type="text" value = "0" help="[kfeatures] Single K or comma-separated Ks for features (variables), or 0 for none." />
     <param name="iter_max" label="Maximum number of iterations" type="text" value = "20" help="[iter_max] The maximum number of iterations allowed; default 20." />
     <param name="nstart" label="Number of random sets of clusters" type="text" value = "20" help="[nstart] How many random sets of clusters should be chosen initially; default 20." />
-    <param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="[algorithm] K-means clustering algorithm, default 'Hartigan-Wong'; &lt;br /&gt;alternatives 'Lloyd', 'MacQueen'; 'Forgy' is same as 'Lloyd', see references.">
+    <param name="algorithm" label="Algorithm for clustering" type="select" value = "Hartigan-Wong" help="[algorithm] K-means clustering algorithm, default 'Hartigan-Wong'; &lt;br /&gt;alternatives 'Lloyd', 'MacQueen'; 'Forgy' (synonym for 'Lloyd'); see references.">
       <option value="Forgy">Forgy</option>
       <option value="Hartigan-Wong" selected="True">Hartigan-Wong</option>
       <option value="Lloyd">Lloyd</option>
@@ -61,17 +61,17 @@
       <param name="variableMetadata_in" value="input_variableMetadata.tsv"/>
       <param name="ksamples" value="3,4"/>
       <param name="kfeatures" value="5,6,7"/>
-      <param name="iter_max" value="10"/>
-      <param name="nstart" value="1"/>
+      <param name="iter_max" value="20"/>
+      <param name="nstart" value="20"/>
       <param name="algorithm" value="Hartigan-Wong"/>
       <output name="scores_out">
         <assert_contents>
           <has_text     text="proportion" />
           <has_text     text="0.87482" />
-          <has_text     text="0.89248" />
-          <has_text     text="0.95355" />
-          <has_text     text="0.95673" />
-          <has_text     text="0.95963" />
+          <has_text     text="0.91765" />
+          <has_text     text="0.95362" />
+          <has_text     text="0.95719" />
+          <has_text     text="0.97966" />
         </assert_contents>
       </output>
     </test>
@@ -146,7 +146,7 @@ Parameters
 
 **Prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
 
-- Some tools treat only non-numeric data as categorical; this prefix ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools accept integers as categorical data).
+- Some tools treat only non-numeric data as categorical; this prefix ensures that clusters data will be treated as categorical; an empty string is permitted here if desired (and succeeding tools requiring categorical data accept integers).
 
 **K-values for samples** - K or K-range for samples (default = 0)
 
@@ -192,10 +192,12 @@ Output files
 Working example
 ---------------
 
+.. class:: infomark
+
 **Input files**
 
 +-------------------------------------------------------------------------------------------------------------------+
-| Download from URL                                                                                                 |
+| URL                                                                                                               |
 +===================================================================================================================+
 | https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/input_dataMatrix.tsv       |
 +-------------------------------------------------------------------------------------------------------------------+
@@ -203,6 +205,8 @@ Working example
 +-------------------------------------------------------------------------------------------------------------------+
 | https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/input_variableMetadata.tsv |
 +-------------------------------------------------------------------------------------------------------------------+
+
+.. class:: infomark
 
 **Other input parameters**
 
@@ -221,6 +225,20 @@ Working example
 +-----------------+---------------+
 | algorithm       | Hartigan-Wong |
 +-----------------+---------------+
+
+.. class:: infomark
+
+**Expected output files**
+
++-------------------------------------------------------------------------------------------------------------------+
+| URL                                                                                                               |
++===================================================================================================================+
+| https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/output_kmeans-score.tsv    |
++-------------------------------------------------------------------------------------------------------------------+
+| https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/output_kmeans-vrbl.tsv     |
++-------------------------------------------------------------------------------------------------------------------+
+| https://raw.githubusercontent.com/HegemanLab/w4mkmeans_galaxy_wrapper/master/test-data/output_kmeans-smpl.tsv     |
++-------------------------------------------------------------------------------------------------------------------+
 
 ----
 NEWS
