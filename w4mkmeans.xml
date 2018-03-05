@@ -88,7 +88,7 @@ K-means for W4m data matrix
 
 **Source Code** - The source code for the w4mkmeans tool is available (from the Hegeman lab github repository) at https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper
 
-**R code used** - The R code invoked by this wrapper is the R 'stats::kmeans' package
+**R code used** - The R code invoked by this wrapper is the R kmeans package at https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html
 
 **Tool updates** - See the **NEWS** section at the bottom of this page
 
