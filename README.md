@@ -2,7 +2,7 @@
 
 [Repository 'w4mkmeans' in Galaxy Toolshed](https://toolshed.g2.bx.psu.edu/view/eschen42/w4mkmeans/02cafb660b72)
 
-# Kmeans for W4m
+# K-means for W4m data matrix
 
 ## A Galaxy tool to calculate K-means for W4m (Workflow4Metabolomics) dataMatrix features or samples
 
@@ -163,8 +163,8 @@ Guitton, Yann and Tremblay-Franco, Marie and Le Corguillé, Gildas and Martin, J
 
 Giacomoni, F. and Le Corguille, G. and Monsoor, M. and Landi, M. and Pericard, P. and Petera, M. and Duperier, C. and Tremblay-Franco, M. and Martin, J.-F. and Jacob, D. and et al. \(2014\). Workflow4Metabolomics: a collaborative research infrastructure for computational metabolomics. In _Bioinformatics, 31 \(9\), pp. 1493–1495._ \[[doi:10.1093/bioinformatics/btu813](http://dx.doi.org/10.1093/bioinformatics/btu813)\]
 
-Hartigan, J. and Wong, M. \(1979\). Algorithm AS136: A k-means clustering algorithm. In _Applied Statistics, 28, pp. 100-108._
+Hartigan, J. and Wong, M. \(1979\). Algorithm AS136: A k-means clustering algorithm. In _Applied Statistics, 28, pp. 100-108._ \[[doi:10.2307/2346830](http://dx.doi.org/10.2307/2346830)\]
 
-Lloyd, S. \(1982\). Least squares quantization in PCM. In _IEEE Transactions on Information Theory, 28 \(2\), pp. 129–137._ \[[doi:10.1109/tit.1982.1056489](http://dx.doi.org/10.1109/tit.1982.1056489)\]
+Lloyd, S. \(1982\). Least squares quantization in PCM. In _IEEE Transactions on Information Theory, 28 \(2\), pp. 129–137._  \[[doi:10.1109/tit.1982.1056489](http://dx.doi.org/10.1109/tit.1982.1056489)\]
 
 MacQueen, J. B. \(1967\). Some Methods for Classification and Analysis of MultiVariate Observations. In _Proc. of the fifth Berkeley Symposium on Mathematical Statistics and Probability, pp. 281-297._

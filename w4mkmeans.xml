@@ -32,9 +32,9 @@
   ]]></command>
 
   <inputs>
-    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable x sample; decimal point: '.'; missing: NA; mode: numerical; separator: tab" />
+    <param name="dataMatrix_in" label="Data matrix file" type="data" format="tabular" help="variable (feature) x sample; decimal point: '.'; missing: NA; mode: numerical; separator: tab" />
     <param name="sampleMetadata_in" label="Sample metadata file" type="data" format="tabular" help="sample x metadata columns; separator: tab" />
-    <param name="variableMetadata_in" label="Variable metadata file" type="data" format="tabular" help="variable x metadata columns; separator: tab" />
+    <param name="variableMetadata_in" label="Variable (feature) metadata file" type="data" format="tabular" help="variable (feature) x metadata columns; separator: tab" />
     <param name="categoricalPrefix" label="prefix for cluster names " type="text" value="c" help="String prepended to cluster numbers in output; default 'c'; leave blank for no prefix." />
     <param name="ksamples" label="K value(s) for samples" type="text" value = "0" help="[ksamples] Single K or comma-separated Ks for samples, or 0 for none." />
     <param name="kfeatures" label="K value(s) for features" type="text" value = "0" help="[kfeatures] Single K or comma-separated Ks for features (variables), or 0 for none." />
@@ -80,36 +80,23 @@
   <help>
     <![CDATA[
 
-**Author** - Arthur Eschenlauer (University of Minnesota, esch0041@umn.edu)
-
----------------------------------------------------------------------------
-
-
-**Source** - The source code for the w4mkmeans tool is available (from the Hegeman lab github repository) at https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper
-
-**R code used** - The R code invoked by this wrapper is the R 'stats::kmeans' package
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-**Tool updates**
-
-See the **NEWS** section at the bottom of this page
-
----------------------------------------------------
-
 ===========================
 K-means for W4M data matrix
 ===========================
+
+**Author** - Arthur Eschenlauer (University of Minnesota, esch0041@umn.edu)
+
+**Source Code** - The source code for the w4mkmeans tool is available (from the Hegeman lab github repository) at https://github.com/HegemanLab/w4mkmeans_galaxy_wrapper
+
+**R code used** - The R code invoked by this wrapper is the R 'stats::kmeans' package
+
+**Tool updates** - See the **NEWS** section at the bottom of this page
 
 -----------
 Description
 -----------
 
 Calculate K-means for sample-clusters (or feature-clusters, or both) using W4M dataMatrix (i.e., XCMS-preprocessed data files) as input.
-
-*Please note that XCMS refers to features as 'variables'.  This documentation does not use either term consistently.*
-
 
 -----------------
 Workflow Position
@@ -118,7 +105,6 @@ Workflow Position
 - Tool category: Statistical Analysis
 - Upstream tool category: Preprocessing
 - Downstream tool categories: Statistical Analysis
-
 
 ----------
 Motivation
@@ -130,7 +116,6 @@ This tool clusters samples, features (i.e., statistical variables), or both from
 - This clustering is **not** hierarchical; each member of a cluster is not a member of any other cluster.
 - For feature-clustering, each feature is assigned to a cluster such that the feature's response for all samples is closer to the mean of all features for that cluster than to the mean for any other cluster.
 - For sample-clustering, each sample is assigned to a cluster such that the sample's response for all features is closer to the mean of all samples for that cluster than to the mean for any other cluster.
-
 
 -----------
 Input files
@@ -153,7 +138,7 @@ Parameters
 
 **Data matrix** - input-file dataset
 
-- XCMS variable x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
+- XCMS variable (i.e. feature) x sample 'dataMatrix' (tabular separated values) file of the numeric data matrix, with . as decimal, and NA for missing values; the table must not contain metadata apart from row and column names; the row and column names must be identical to the rownames of the sample and feature metadata, respectively (see below)
 
 **Sample metadata** - input-file dataset
 
@@ -161,7 +146,7 @@ Parameters
 
 **Feature metadata** - input-file dataset
 
-- XCMS variable x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
+- XCMS variable (i.e. feature) x metadata 'variableMetadata' (tabular separated values) file of the numeric and/or character feature metadata, with . as decimal and NA for missing values
 
 **prefix for cluster names** - character(s) to add as prefix to category number (default = 'c')
 
@@ -288,23 +273,7 @@ Citations
     <!-- W4M 2.5 - Giacomini et al. 2014 -->
     <citation type="doi">10.1093/bioinformatics/btu813</citation>
     <!-- Hartigan and Wong algorithm -->
-    <citation type="bibtex"><![CDATA[
-@article{Hartigan79,
-  added-at = {2007-02-27T16:22:09.000+0100},
-  author = {Hartigan, J. and Wong, M.},
-  biburl = {https://www.bibsonomy.org/bibtex/23d8bfc440c5725783876929c022f67ce/pierpaolo.pk81},
-  description = {WSD},
-  interhash = {10d6d33920d9af578a4d0a556dc1477d},
-  intrahash = {3d8bfc440c5725783876929c022f67ce},
-  journal = {Applied Statistics},
-  keywords = {imported},
-  pages = {100-108},
-  timestamp = {2007-02-27T16:22:11.000+0100},
-  title = {Algorithm AS136: A k-means clustering algorithm},
-  volume = 28,
-  year = 1979
-}
-    ]]></citation>
+    <citation type="doi">10.2307/2346830</citation>
     <!-- Lloyd algorithm -->
     <citation type="doi">10.1109/TIT.1982.1056489</citation>
     <!-- MacQueen algorithm -->
