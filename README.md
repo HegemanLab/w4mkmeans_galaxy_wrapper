@@ -134,7 +134,7 @@ Using the intensities in the dataMatrix, this tool clusters samples, features \(
 
 September 2018, Version 0.98.5 - Maintenance release
 
-  - Fix issue [https://github.com/HegemanLab/w4mclassfilter/issues/1](https://github.com/HegemanLab/w4mclassfilter/issues/1)
+  - Fix issue inherited by copy-paste from [https://github.com/HegemanLab/w4mclassfilter/issues/1](https://github.com/HegemanLab/w4mclassfilter/issues/1).
 
 March 2018, Version 0.98.4 - Maintenance release
 
