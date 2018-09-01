@@ -120,7 +120,7 @@ if ( ! exists("w4mkmeans") ) {
 
 # read_data_frame - read a w4m data frame from a tsv, with error handling
 #   e.g., data_matrix_input_env <- read_data_frame(dataMatrix_in, "data matrix input")
-read_data_frame <- function(file_path, kind_string, failure_action = log_print) {
+read_data_frame <- function(file_path, kind_string, rdf_failure_action = log_print) {
   my.env <- new.env()
   my.env$success <- FALSE
   my.env$msg <- sprintf("no message reading %s", kind_string)
@@ -134,7 +134,7 @@ read_data_frame <- function(file_path, kind_string, failure_action = log_print) 
     }
   )
   if (!my.env$success) {
-    failure_action(my.env$msg)
+    rdf_failure_action(my.env$msg)
   }
   return (my.env)
 }
@@ -177,7 +177,7 @@ read_input_data <- function(env, failure_action = log_print) {
         read_data_frame(
                          file_path = env$sample_metadata_path
                        , kind_string = kind_string
-                       , failure_action = failure_action
+                       , rdf_failure_action = failure_action
                        )
       if (!smpl_metadata_input_env$success) {
         failure_action(smpl_metadata_input_env$msg)
@@ -191,7 +191,7 @@ read_input_data <- function(env, failure_action = log_print) {
         read_data_frame(
                          file_path = env$variable_metadata_path
                        , kind_string = kind_string
-                       , failure_action = failure_action
+                       , rdf_failure_action = failure_action
                        )
       if (!vrbl_metadata_input_env$success) {
         failure_action(vrbl_metadata_input_env$msg)
@@ -205,7 +205,7 @@ read_input_data <- function(env, failure_action = log_print) {
         read_data_frame(
                          file_path = env$data_matrix_path
                        , kind_string = kind_string
-                       , failure_action = failure_action
+                       , rdf_failure_action = failure_action
                        )
       if (!data_matrix_input_env$success) {
         failure_action(data_matrix_input_env$msg)
